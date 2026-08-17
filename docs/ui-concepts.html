@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClassMap — Interface Concepts</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ClassMap · interface concepts
+   Eight live concepts — five ways to draw the room, three ways to
+   draw the dashboard. Same demo class in every one, so the only
+   thing that changes between them is the design.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── tokens ── */
+:root{
+  --bg:#f4f5f8; --panel:#ffffff; --panel2:#f7f8fb; --sunk:#eef0f5;
+  --line:#e2e5ee; --line2:#d3d8e6;
+  --ink:#161922; --ink2:#5b6478; --ink3:#8990a3;
+  --brand:#5b52e8; --brand-soft:rgba(91,82,232,.1);
+  --t0:#e8663f; --t1:#e0a020; --t2:#1f9d68;
+  --busy:#e0a020; --done:#1f9d68; --help:#e04a4a; --idle:#a8afc0; --card:#3b82f6;
+  --radius:14px;
+  --shadow:0 1px 2px rgba(16,20,40,.05), 0 8px 24px rgba(16,20,40,.06);
+  --shadow-sm:0 1px 2px rgba(16,20,40,.07);
+  --mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,system-ui,sans-serif;
+}
+body.dark{
+  --bg:#0c0e14; --panel:#151925; --panel2:#1b2030; --sunk:#11141d;
+  --line:#252b3b; --line2:#333a4e;
+  --ink:#e9ecf5; --ink2:#98a1b8; --ink3:#6b7488;
+  --brand:#7c74ff; --brand-soft:rgba(124,116,255,.14);
+  --t0:#ff8663; --t1:#f0b73f; --t2:#3ecf8e;
+  --busy:#f0b73f; --done:#3ecf8e; --help:#ff6b6b; --idle:#59617a; --card:#5b9bf8;
+  --shadow:0 2px 4px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+  --shadow-sm:0 2px 6px rgba(0,0,0,.3);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+
+/* ── chrome ── */
+.top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--panel) 88%,transparent);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 26px}
+.top-in{max-width:1560px;margin:0 auto;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;margin-right:auto}
+.logo b{width:32px;height:32px;border-radius:9px;background:var(--brand);color:#fff;
+  display:grid;place-items:center;font-size:13px;font-weight:800;letter-spacing:-.5px}
+.logo span{font-size:16px;font-weight:700;letter-spacing:-.02em}
+.logo em{font-style:normal;color:var(--ink3);font-weight:500;font-size:13px;margin-left:2px}
+.ctl{display:flex;align-items:center;gap:6px}
+.ctl-lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);margin-right:2px}
+.seg{display:inline-flex;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink2);
+  padding:6px 12px;border-radius:7px;cursor:pointer;transition:.15s;white-space:nowrap}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow-sm)}
+body.dark .seg button.on{background:var(--line2)}
+
+/* ── concept nav ── */
+.nav{max-width:1560px;margin:0 auto;padding:20px 26px 0;display:flex;gap:8px;flex-wrap:wrap}
+.nav-group{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.nav-group + .nav-group{margin-left:14px;padding-left:18px;border-left:1px solid var(--line)}
+.nav-group > i{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink3)}
+.chip{border:1px solid var(--line);background:var(--panel);color:var(--ink2);font:inherit;font-size:13px;
+  font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:7px}
+.chip:hover{border-color:var(--line2);color:var(--ink)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip .n{font-family:var(--mono);font-size:11px;opacity:.6}
+
+/* ── stage ── */
+.wrap{max-width:1560px;margin:0 auto;padding:22px 26px 70px}
+.head{display:flex;align-items:flex-start;gap:22px;flex-wrap:wrap;margin-bottom:18px}
+.head h1{font-size:26px;font-weight:750;letter-spacing:-.03em;line-height:1.15}
+.head .sub{font-size:14px;color:var(--ink2);line-height:1.55;max-width:640px;margin-top:5px}
+.head .meta{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start}
+.tag{font-size:11px;font-weight:700;letter-spacing:.03em;padding:5px 10px;border-radius:7px;
+  background:var(--sunk);color:var(--ink2);border:1px solid var(--line);white-space:nowrap}
+.tag.good{background:rgba(31,157,104,.12);color:var(--done);border-color:transparent}
+.tag.warn{background:rgba(224,160,32,.14);color:var(--busy);border-color:transparent}
+
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  box-shadow:var(--shadow);overflow:hidden;margin-bottom:18px}
+.stage-bar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);
+  background:var(--panel2);flex-wrap:wrap}
+.stage-bar .dot{width:9px;height:9px;border-radius:50%;background:var(--done);flex:none;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--done) 22%,transparent)}
+.stage-bar .ttl{font-size:13.5px;font-weight:700}
+.stage-bar .sml{font-size:12px;color:var(--ink3);font-family:var(--mono)}
+.stage-bar .right{margin-left:auto;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.pill{font-size:11px;font-weight:700;padding:4px 9px;border-radius:999px;background:var(--sunk);color:var(--ink2)}
+.stage-body{padding:24px}
+.frame{margin:0 auto;transition:max-width .3s}
+body[data-w="proj"] .frame{max-width:100%}
+body[data-w="tab"]  .frame{max-width:840px}
+body[data-w="phone"].frame,body[data-w="phone"] .frame{max-width:400px}
+
+/* ── phone behaviour: these are the rules the real build would ship ── */
+body[data-w="phone"] .board{flex-direction:column;overflow-x:visible}
+body[data-w="phone"] .bcol{min-width:0}
+body[data-w="phone"] .bcol-b{flex-direction:row;flex-wrap:wrap}
+body[data-w="phone"] .floor{height:420px}
+body[data-w="phone"] .wall{grid-template-columns:1fr}
+body[data-w="phone"] .cmd,body[data-w="phone"] .rep{grid-template-columns:1fr}
+body[data-w="phone"] .mxwrap{overflow-x:auto}
+body[data-w="phone"] .metro{overflow-x:auto}
+body[data-w="phone"] .metro > svg,body[data-w="phone"] .metro-people{min-width:620px}
+
+/* ── notes ── */
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.note h4{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-bottom:9px}
+.note ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.note li{font-size:13px;line-height:1.5;color:var(--ink2);padding-left:17px;position:relative}
+.note li::before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:50%;background:var(--line2)}
+.note.win li::before{background:var(--done)}
+.note.cost li::before{background:var(--busy)}
+.note li b{color:var(--ink);font-weight:650}
+
+/* ═══ shared atoms ═══ */
+.who{display:inline-flex;align-items:center;gap:7px;padding:5px 11px 5px 5px;border-radius:999px;
+  background:var(--panel);border:1px solid var(--line);font-size:12.5px;font-weight:600;white-space:nowrap}
+.av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:10px;
+  font-weight:800;color:#fff;flex:none;letter-spacing:-.3px}
+.st{width:7px;height:7px;border-radius:50%;flex:none}
+.s-busy{background:var(--busy)}.s-done{background:var(--done)}
+.s-help{background:var(--help)}.s-idle{background:var(--idle)}
+.who.h{border-color:var(--help);box-shadow:0 0 0 3px color-mix(in srgb,var(--help) 14%,transparent)}
+
+/* ═══ M1 · METRO ═══ */
+.metro{padding:6px 0}
+.metro svg{display:block;width:100%;height:auto;overflow:visible}
+.mt-line{stroke:var(--line2);stroke-width:7;stroke-linecap:round;fill:none}
+.mt-line.on{stroke:var(--brand)}
+.mt-node circle.ring{fill:var(--panel);stroke:var(--line2);stroke-width:3.5}
+.mt-node.act circle.ring{stroke:var(--brand)}
+.mt-node.dn circle.ring{stroke:var(--done);fill:color-mix(in srgb,var(--done) 12%,var(--panel))}
+.mt-node.lk circle.ring{stroke-dasharray:3 3;opacity:.55}
+.mt-node text.ic{font-size:13px;text-anchor:middle;dominant-baseline:central}
+.mt-lbl{font-size:11px;font-weight:700;fill:var(--ink);text-anchor:middle}
+.mt-sub{font-size:9px;fill:var(--ink3);text-anchor:middle;font-family:var(--mono)}
+.metro-people{display:grid;gap:10px;margin-top:4px}
+.mp-col{display:flex;flex-direction:column;gap:6px;align-items:center;min-height:30px}
+
+/* ═══ M2 · BOARD ═══ */
+.board{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px}
+.bcol{flex:1;min-width:158px;background:var(--panel2);border:1px solid var(--line);border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden}
+.bcol.alert{border-color:var(--help);background:color-mix(in srgb,var(--help) 5%,var(--panel2))}
+.bcol-h{padding:11px 13px 10px;border-bottom:1px solid var(--line)}
+.bcol-h .k{font-size:9.5px;font-weight:800;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
+.bcol-h .n{font-size:13.5px;font-weight:700;margin-top:2px;line-height:1.25}
+.bcol-h .bar{height:4px;border-radius:99px;background:var(--sunk);margin-top:9px;overflow:hidden;display:flex}
+.bcol-h .bar i{display:block;height:100%}
+.bcol-b{padding:10px;display:flex;flex-direction:column;gap:7px;flex:1}
+.bcol-b .empty{font-size:11.5px;color:var(--ink3);text-align:center;padding:14px 0;font-style:italic}
+.bcol-f{padding:8px 13px;border-top:1px solid var(--line);font-size:10.5px;color:var(--ink3);
+  font-family:var(--mono);display:flex;justify-content:space-between}
+
+/* ═══ M3 · FLOOR PLAN ═══ */
+.floor{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:16px;
+  padding:20px;height:min(52vw,430px);min-height:360px;max-width:1080px;margin:0 auto}
+.floor::before{content:'';position:absolute;inset:0;border-radius:16px;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:34px 34px;opacity:.35}
+.fl-board{position:absolute;top:14px;left:50%;transform:translateX(-50%);width:30%;height:15px;
+  border-radius:4px;background:var(--line2);display:grid;place-items:center;
+  font-size:8.5px;font-weight:800;letter-spacing:.14em;color:var(--panel);text-transform:uppercase}
+.fl-door{position:absolute;bottom:13px;left:16px;font-size:10px;font-weight:700;color:var(--ink3);
+  border:1px dashed var(--line2);border-radius:6px;padding:3px 8px}
+.fl-desk{position:absolute;bottom:13px;right:16px;font-size:10px;font-weight:700;color:var(--ink3);
+  border:1px solid var(--line2);border-radius:6px;padding:3px 8px;background:var(--panel)}
+.table{position:absolute;transform:translate(-50%,-50%);background:var(--panel);border:1.5px solid var(--line2);
+  border-radius:14px;padding:10px 12px;min-width:132px;box-shadow:var(--shadow);cursor:pointer;transition:.15s}
+.table:hover{border-color:var(--brand);transform:translate(-50%,-50%) scale(1.03)}
+.table.help{border-color:var(--help);box-shadow:0 0 0 4px color-mix(in srgb,var(--help) 12%,transparent)}
+.table.done{border-color:var(--done)}
+.table .tn{font-size:11.5px;font-weight:750;line-height:1.2;display:flex;align-items:center;gap:5px}
+.table .tk{font-size:8.5px;font-weight:800;letter-spacing:.1em;color:var(--ink3);text-transform:uppercase;margin-bottom:3px}
+.seats{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap}
+.seat{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:9px;
+  font-weight:800;color:#fff;position:relative}
+.seat i{position:absolute;right:-1px;bottom:-1px;width:7px;height:7px;border-radius:50%;border:1.5px solid var(--panel)}
+.seat.free{background:var(--sunk);border:1.5px dashed var(--line2)}
+
+/* ═══ M4 · CONSTELLATION ═══ */
+.cons{position:relative;border-radius:16px;padding:14px;max-width:1000px;margin:0 auto;background:
+  radial-gradient(ellipse 70% 60% at 30% 20%,var(--brand-soft),transparent 60%),var(--panel2);
+  border:1px solid var(--line)}
+.cons svg{display:block;width:100%;height:auto;overflow:visible}
+.cn-edge{fill:none;stroke:var(--line2);stroke-width:2}
+.cn-edge.live{stroke:var(--brand);stroke-dasharray:5 5;animation:flow 1.1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-20}}
+@media (prefers-reduced-motion:reduce){.cn-edge.live{animation:none}}
+.cn-node .halo{fill:var(--panel);stroke-width:2.5}
+.cn-node.dn .halo{stroke:var(--done);fill:color-mix(in srgb,var(--done) 10%,var(--panel))}
+.cn-node.ac .halo{stroke:var(--brand)}
+.cn-node.lk .halo{stroke:var(--line2);opacity:.6}
+.cn-node text.ic{font-size:15px;text-anchor:middle;dominant-baseline:central}
+.cn-name{font-size:10.5px;font-weight:750;fill:var(--ink);text-anchor:middle}
+.cn-cnt{font-size:8.5px;font-family:var(--mono);fill:var(--ink3);text-anchor:middle}
+.cn-tier{stroke:var(--panel);stroke-width:1.6}
+
+/* ═══ M5 · MATRIX ═══ */
+.mx{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
+.mx th,.mx td{padding:0;text-align:center}
+.mx thead th{font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);
+  padding:0 4px 11px;vertical-align:bottom;line-height:1.25}
+.mx thead th.nm{text-align:left;padding-left:2px}
+.mx tbody td{border-top:1px solid var(--line);height:40px}
+.mx tbody tr:hover td{background:var(--panel2)}
+.mx .nm{text-align:left;font-weight:650;white-space:nowrap;padding-left:2px}
+.mx .nm .sub{display:block;font-size:10px;color:var(--ink3);font-weight:500;font-family:var(--mono)}
+.cell{width:26px;height:26px;border-radius:8px;display:inline-grid;place-items:center;
+  font-size:11px;font-weight:800;color:#fff}
+.c-done{background:var(--done)}
+.c-busy{background:var(--busy)}
+.c-help{background:var(--help);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--help) 20%,transparent)}}
+.c-lock{background:var(--sunk);color:var(--ink3);border:1px dashed var(--line2)}
+.c-open{background:transparent;border:1.5px solid var(--line2);color:var(--ink3)}
+.tchip{font-size:9.5px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;text-transform:uppercase}
+
+/* ═══ DASHBOARDS ═══ */
+/* D1 command */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.kpi{background:var(--panel);padding:14px 16px}
+.kpi .v{font-size:27px;font-weight:750;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin-top:6px}
+.kpi .d{font-size:10.5px;color:var(--ink3);margin-top:3px;font-family:var(--mono)}
+.cmd{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}
+@media(max-width:860px){.cmd{grid-template-columns:1fr}}
+.pane{background:var(--panel2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.pane-h{padding:11px 15px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:9px;
+  font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
+.pane-h .ct{margin-left:auto;font-family:var(--mono);letter-spacing:0;text-transform:none;font-size:11px}
+.pane-b{padding:11px}
+.q{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;background:var(--panel);
+  border:1px solid var(--line);margin-bottom:7px}
+.q.urgent{border-left:3px solid var(--help)}
+.q.mid{border-left:3px solid var(--busy)}
+.q .nmm{font-weight:700;font-size:13px}
+.q .wh{font-size:11.5px;color:var(--ink3);margin-left:auto;font-family:var(--mono)}
+.q .why{font-size:11.5px;color:var(--ink2)}
+.occ{display:flex;align-items:center;gap:10px;padding:7px 11px;font-size:12.5px}
+.occ .on{font-weight:650;min-width:96px}
+.occ .tr{flex:1;height:8px;border-radius:99px;background:var(--sunk);overflow:hidden;display:flex}
+.occ .tr i{height:100%}
+.occ .cn{font-family:var(--mono);font-size:11px;color:var(--ink3);min-width:22px;text-align:right}
+.tick{font-size:12px;display:flex;gap:9px;padding:6px 11px;align-items:center;color:var(--ink2)}
+.tick b{color:var(--ink);font-weight:650}
+.tick .t{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--ink3)}
+
+/* D2 card wall */
+.wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:12px}
+.pcard{background:var(--panel2);border:1px solid var(--line);border-radius:15px;padding:14px;
+  position:relative;overflow:hidden}
+.pcard::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.pcard.help::after{background:var(--help)}.pcard.busy::after{background:var(--busy)}
+.pcard.done::after{background:var(--done)}.pcard.idle::after{background:var(--idle)}
+.pcard .rowa{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.pcard .av{width:34px;height:34px;font-size:13px}
+.pcard .nm2{font-size:15px;font-weight:700;letter-spacing:-.01em;line-height:1.2}
+.pcard .loc{font-size:11.5px;color:var(--ink3);margin-top:2px;line-height:1.3}
+.pcard .rowa > div{min-height:38px}
+.pcard .sts{margin-left:auto;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  padding:4px 9px;border-radius:999px}
+.pcard .fl{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.fchip{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
+  background:var(--sunk);color:var(--ink2)}
+.fchip.red{background:color-mix(in srgb,var(--help) 15%,transparent);color:var(--help)}
+.fchip.blue{background:color-mix(in srgb,var(--card) 15%,transparent);color:var(--card)}
+.pcard .mini{display:flex;gap:3px;margin-top:11px}
+.pcard .mini i{flex:1;height:5px;border-radius:99px;background:var(--sunk)}
+.pcard .mini i.d{background:var(--done)}
+.pcard .mini i.c{background:var(--busy)}
+
+/* D3 analytics */
+.rep{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:860px){.rep{grid-template-columns:1fr}}
+.rcard{background:var(--panel2);border:1px solid var(--line);border-radius:15px;padding:17px 19px}
+.rcard h5{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);
+  margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.rcard h5 span{letter-spacing:0;text-transform:none;font-weight:600;font-size:11.5px}
+.hbar{display:flex;align-items:center;gap:11px;margin-bottom:10px}
+.hbar .hl{font-size:12.5px;font-weight:650;min-width:88px}
+.hbar .ht{flex:1;height:22px;border-radius:7px;background:var(--sunk);overflow:hidden}
+.hbar .ht i{display:block;height:100%;border-radius:7px}
+.hbar .hv{font-family:var(--mono);font-size:11.5px;color:var(--ink3);min-width:52px;text-align:right}
+.cols{display:flex;align-items:stretch;gap:8px;height:170px;padding-top:8px}
+.cols .cb{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:7px}
+.cols .cb u{display:block;background:var(--brand);border-radius:7px 7px 3px 3px;text-decoration:none;
+  min-height:3px;opacity:.85}
+.cols .cb.peak u{opacity:1;box-shadow:0 0 0 3px var(--brand-soft)}
+.cols .cl{font-size:10px;color:var(--ink3);text-align:center;font-family:var(--mono);line-height:1.35;
+  height:34px;display:flex;flex-direction:column;justify-content:flex-start}
+.cols .cl b{color:var(--ink2);font-size:10.5px;font-weight:700;font-family:var(--sans)}
+.dstat{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));gap:9px;margin-top:4px}
+.dstat div{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:11px;text-align:center}
+.dstat .dv{font-size:21px;font-weight:750;letter-spacing:-.03em;line-height:1}
+.dstat .dl{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink3);margin-top:5px}
+.tl{position:relative;padding-left:15px}
+.tl::before{content:'';position:absolute;left:4px;top:5px;bottom:5px;width:2px;background:var(--line)}
+.tl .ti{position:relative;padding:6px 0;font-size:12.5px;color:var(--ink2)}
+.tl .ti::before{content:'';position:absolute;left:-15px;top:11px;width:9px;height:9px;border-radius:50%;
+  background:var(--panel2);border:2px solid var(--brand)}
+.tl .ti b{color:var(--ink);font-weight:650}
+.tl .ti span{font-family:var(--mono);font-size:10.5px;color:var(--ink3);margin-left:6px}
+
+/* footer */
+.foot{max-width:1560px;margin:0 auto;padding:0 26px 60px}
+.foot .box{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px}
+.foot h3{font-size:16px;font-weight:750;letter-spacing:-.02em;margin-bottom:10px}
+.foot p{font-size:13.5px;color:var(--ink2);line-height:1.65;max-width:800px}
+.foot p + p{margin-top:9px}
+.foot b{color:var(--ink);font-weight:650}
+</style>
+</head>
+<body data-w="proj">
+
+<div class="top"><div class="top-in">
+  <div class="logo"><b>CM</b><span>ClassMap</span><em>interface concepts</em></div>
+  <div class="ctl"><span class="ctl-lbl">Screen</span>
+    <div class="seg" id="segW">
+      <button data-w="proj" class="on">Projector</button>
+      <button data-w="tab">Tablet</button>
+      <button data-w="phone">Phone</button>
+    </div>
+  </div>
+  <div class="ctl"><span class="ctl-lbl">Theme</span>
+    <div class="seg" id="segT">
+      <button data-t="light" class="on">Light</button>
+      <button data-t="dark">Dark</button>
+    </div>
+  </div>
+</div></div>
+
+<div class="nav" id="nav"></div>
+<div class="wrap">
+  <div class="head">
+    <div><h1 id="cTitle"></h1><p class="sub" id="cSub"></p></div>
+    <div class="meta" id="cMeta"></div>
+  </div>
+  <div class="stage">
+    <div class="stage-bar">
+      <span class="dot"></span>
+      <span class="ttl">Grade 7 · Sources &amp; Evidence</span>
+      <span class="sml">CODE 7HK2QP</span>
+      <span class="right">
+        <span class="pill">8 students</span>
+        <span class="pill" style="background:color-mix(in srgb,var(--help) 14%,transparent);color:var(--help)">2 need clarification</span>
+      </span>
+    </div>
+    <div class="stage-body"><div class="frame" id="stage"></div></div>
+  </div>
+  <div class="notes" id="notes"></div>
+</div>
+
+<div class="foot"><div class="box">
+  <h3>How to read these</h3>
+  <p>Every concept shows the <b>same eight students at the same moment</b> of the same lesson, so the only variable is the design. Switch to <b>Phone</b> to see what a student holds, and <b>Projector</b> to see what goes on the wall — several of these behave very differently at the two sizes, and that is usually what decides it.</p>
+  <p>The five map concepts are <b>structurally</b> different, not restyled versions of each other. The three dashboards are alternative answers to one question: what should a teacher see first when they glance up?</p>
+</div></div>
+
+<script>
+/* ═══ demo class — one moment, one lesson ═══ */
+const TIERS=[{n:'Developing',c:'var(--t0)'},{n:'Secure',c:'var(--t1)'},{n:'Extending',c:'var(--t2)'}];
+const S=[
+ {n:'Aanya',  t:1, st:'busy', at:2, done:[1],     f:[]},
+ {n:'Bilal',  t:0, st:'help', at:2, done:[1],     f:[['Reading age 2.1 yrs below','red'],['Priority support','']]},
+ {n:'Chen',   t:2, st:'done', at:4, done:[1,2,3], f:[['Needs stretch','blue']]},
+ {n:'Dalia',  t:1, st:'busy', at:3, done:[1,2],   f:[]},
+ {n:'Eli',    t:0, st:'help', at:1, done:[],      f:[['Task text above reading age','red']]},
+ {n:'Farah',  t:2, st:'busy', at:5, done:[1,2,3,4], f:[['Spiky CAT4 profile','blue']]},
+ {n:'Gabriel',t:1, st:'done', at:3, done:[1,2],   f:[['Below profile today','']]},
+ {n:'Hana',   t:null,st:'idle',at:null,done:[],   f:[['No benchmark data','red']]}
+];
+const ST=[
+ {i:1,n:'Read the source',   k:'Station 1',ic:'📖'},
+ {i:2,n:'Question it',       k:'Station 2',ic:'❓'},
+ {i:3,n:'Cross-check',       k:'Station 3',ic:'🔍'},
+ {i:4,n:'Build the claim',   k:'Station 4',ic:'🧱'},
+ {i:5,n:'Peer challenge',    k:'Station 5',ic:'⚔️'},
+ {i:6,n:'You DO',            k:'Final',    ic:'🎯'}
+];
+const at=i=>S.filter(s=>s.at===i);
+const tc=t=>t==null?'var(--idle)':TIERS[t].c;
+const tn=t=>t==null?'No data':TIERS[t].n;
+const ini=n=>n.slice(0,1)+(n.split(' ')[1]||'').slice(0,1);
+const who=(s,extra='')=>`<span class="who ${s.st==='help'?'h':''} ${extra}">
+  <span class="av" style="background:${tc(s.t)}">${ini(s.n)}</span>${s.n}
+  <span class="st s-${s.st}"></span></span>`;
+
+/* ═══ M1 · METRO ═══ */
+function metro(){
+  const W=1000,y=86,x0=70,gap=(W-140)/(ST.length-1);
+  const px=i=>x0+gap*i;
+  let segs='',nodes='';
+  ST.forEach((s,i)=>{
+    if(i<ST.length-1){
+      const anyDone=S.filter(p=>p.done.includes(s.i)).length;
+      segs+=`<path class="mt-line ${anyDone?'on':''}" d="M${px(i)} ${y} L${px(i+1)} ${y}"/>`;
+    }
+    const occ=at(s.i), doneN=S.filter(p=>p.done.includes(s.i)).length;
+    const cls=doneN>=4?'dn':occ.length?'act':(s.i>4?'lk':'');
+    nodes+=`<g class="mt-node ${cls}">
+      <circle class="ring" cx="${px(i)}" cy="${y}" r="19"/>
+      <text class="ic" x="${px(i)}" y="${y}">${s.ic}</text>
+      <text class="mt-lbl" x="${px(i)}" y="${y-32}">${s.n}</text>
+      <text class="mt-sub" x="${px(i)}" y="${y-46}">${s.k.toUpperCase()}</text>
+    </g>`;
+  });
+  // branch to a bonus station
+  const bx=px(3),by=y+62;
+  segs+=`<path class="mt-line" style="stroke:var(--card);stroke-dasharray:2 9" d="M${bx} ${y} Q${bx} ${by} ${bx+70} ${by}"/>`;
+  nodes+=`<g class="mt-node"><circle class="ring" cx="${bx+70}" cy="${by}" r="15" style="stroke:var(--card)"/>
+    <text class="ic" x="${bx+70}" y="${by}" style="font-size:11px">✨</text>
+    <text class="mt-sub" x="${bx+70}" y="${by+28}">EXTENSION</text></g>`;
+
+  const cols=ST.map(s=>`<div class="mp-col">${at(s.i).map(p=>who(p)).join('')}</div>`).join('');
+  return `<div class="metro">
+    <svg viewBox="0 0 ${W} 190">${segs}${nodes}</svg>
+    <div class="metro-people" style="grid-template-columns:repeat(${ST.length},1fr)">${cols}</div>
+  </div>`;
+}
+
+/* ═══ M2 · BOARD ═══ */
+function board(){
+  return `<div class="board">${ST.map(s=>{
+    const occ=at(s.i), help=occ.some(p=>p.st==='help');
+    const d=occ.filter(p=>p.st==='done').length, b=occ.filter(p=>p.st==='busy').length, h=occ.filter(p=>p.st==='help').length;
+    const tot=Math.max(occ.length,1);
+    const bar=`<i style="width:${d/tot*100}%;background:var(--done)"></i>
+               <i style="width:${b/tot*100}%;background:var(--busy)"></i>
+               <i style="width:${h/tot*100}%;background:var(--help)"></i>`;
+    const passed=S.filter(p=>p.done.includes(s.i)).length;
+    return `<div class="bcol ${help?'alert':''}">
+      <div class="bcol-h"><div class="k">${s.k}</div><div class="n">${s.ic} ${s.n}</div>
+        <div class="bar">${occ.length?bar:''}</div></div>
+      <div class="bcol-b">${occ.length?occ.map(p=>who(p)).join(''):'<div class="empty">empty</div>'}</div>
+      <div class="bcol-f"><span>${occ.length} here</span><span>${passed} done</span></div>
+    </div>`;}).join('')}</div>`;
+}
+
+/* ═══ M3 · FLOOR PLAN ═══ */
+function floorplan(){
+  const pos=[[21,36],[50,29],[79,36],[23,73],[50,80],[79,73]];
+  return `<div class="floor">
+    <div class="fl-board">Whiteboard</div>
+    <div class="fl-door">◄ Door</div>
+    <div class="fl-desk">Teacher</div>
+    ${ST.map((s,i)=>{
+      const occ=at(s.i), help=occ.some(p=>p.st==='help');
+      const all=occ.length&&occ.every(p=>p.st==='done');
+      const seats=[0,1,2,3].map(k=>{
+        const p=occ[k];
+        return p?`<span class="seat" style="background:${tc(p.t)}" title="${p.n}">${ini(p.n)}<i class="s-${p.st}" style="background:var(--${p.st==='busy'?'busy':p.st==='done'?'done':p.st==='help'?'help':'idle'})"></i></span>`
+                :`<span class="seat free"></span>`;
+      }).join('');
+      return `<div class="table ${help?'help':''} ${all?'done':''}" style="left:${pos[i][0]}%;top:${pos[i][1]}%">
+        <div class="tk">${s.k}</div>
+        <div class="tn">${s.ic} ${s.n}</div>
+        <div class="seats">${seats}</div>
+      </div>`;}).join('')}
+  </div>`;
+}
+
+/* ═══ M4 · CONSTELLATION ═══ */
+function constellation(){
+  const N=[{i:1,x:96,y:168},{i:2,x:290,y:88},{i:3,x:290,y:250},{i:4,x:490,y:168},{i:5,x:685,y:96},{i:6,x:690,y:250}];
+  const E=[[1,2],[1,3],[2,4],[3,4],[4,5],[4,6]];
+  const P=Object.fromEntries(N.map(n=>[n.i,n]));
+  let edges=E.map(([a,b])=>{
+    const A=P[a],B=P[b],mx=(A.x+B.x)/2;
+    const live=S.some(s=>s.done.includes(a)&&s.at===b);
+    return `<path class="cn-edge ${live?'live':''}" d="M${A.x} ${A.y} C${mx} ${A.y} ${mx} ${B.y} ${B.x} ${B.y}"/>`;
+  }).join('');
+  let nodes=N.map(n=>{
+    const s=ST[n.i-1],occ=at(n.i),doneN=S.filter(p=>p.done.includes(n.i)).length;
+    const cls=doneN>=4?'dn':occ.length?'ac':(n.i>4?'lk':'');
+    const dots=occ.map((p,k)=>`<circle class="cn-tier" cx="${n.x-((occ.length-1)*7)+k*14}" cy="${n.y+46}" r="6" fill="${tc(p.t)}"/>`).join('');
+    return `<g class="cn-node ${cls}">
+      <circle class="halo" cx="${n.x}" cy="${n.y}" r="27"/>
+      <text class="ic" x="${n.x}" y="${n.y}">${s.ic}</text>
+      <text class="cn-name" x="${n.x}" y="${n.y-37}">${s.n}</text>
+      <text class="cn-cnt" x="${n.x}" y="${n.y+(occ.length?66:48)}">${occ.length?occ.length+' here':'empty'}</text>
+      ${dots}</g>`;
+  }).join('');
+  return `<div class="cons"><svg viewBox="0 -14 790 360">${edges}${nodes}</svg></div>`;
+}
+
+/* ═══ M5 · MATRIX ═══ */
+function matrix(){
+  const head=ST.map(s=>`<th>${s.ic}<br>${s.n}</th>`).join('');
+  const rows=S.map(p=>{
+    const cells=ST.map(s=>{
+      let c='c-open',t='';
+      if(p.done.includes(s.i)){c='c-done';t='✓';}
+      else if(p.at===s.i){c=p.st==='help'?'c-help':'c-busy';t=p.st==='help'?'!':'●';}
+      else if(p.at!=null&&s.i>p.at+0){c='c-lock';t='';}
+      return `<td><span class="cell ${c}">${t}</span></td>`;
+    }).join('');
+    return `<tr><td class="nm">${p.n}<span class="sub">${p.done.length}/6 complete</span></td>${cells}
+      <td><span class="tchip" style="background:color-mix(in srgb,${tc(p.t)} 16%,transparent);color:${tc(p.t)}">${tn(p.t)}</span></td></tr>`;
+  }).join('');
+  return `<div class="mxwrap"><table class="mx"><thead><tr><th class="nm">Student</th>${head}<th>Tier</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* ═══ D1 · COMMAND ═══ */
+function command(){
+  const c={busy:0,done:0,help:0,idle:0}; S.forEach(s=>c[s.st]++);
+  const kpi=[['8','Students',''],[c.busy,'Working','on task now'],[c.done,'Finished','ready to move'],
+             [c.help,'Clarification','waiting on you'],[c.idle,'Unplaced','not started'],['88%','Data coverage','7 of 8']];
+  const queue=S.filter(s=>s.st==='help'||s.f.some(f=>f[1]==='red')).map(s=>{
+    const u=s.st==='help';
+    return `<div class="q ${u?'urgent':'mid'}">
+      <span class="av" style="background:${tc(s.t)}">${ini(s.n)}</span>
+      <span class="nmm">${s.n}</span>
+      <span class="why">${u?'asked for clarification':s.f[0][0]}</span>
+      <span class="wh">${s.at?ST[s.at-1].n:'unplaced'}</span></div>`;}).join('');
+  const occ=ST.map(s=>{
+    const o=at(s.i),d=o.filter(p=>p.st==='done').length,h=o.filter(p=>p.st==='help').length;
+    const tot=Math.max(o.length,1);
+    return `<div class="occ"><span class="on">${s.n}</span>
+      <span class="tr">${o.length?`<i style="width:${d/tot*100}%;background:var(--done)"></i>
+        <i style="width:${h/tot*100}%;background:var(--help)"></i>
+        <i style="width:${(o.length-d-h)/tot*100}%;background:var(--busy)"></i>`:''}</span>
+      <span class="cn">${o.length}</span></div>`;}).join('');
+  const feed=[['Chen','Cross-check','Build the claim','1m'],['Gabriel','Question it','Cross-check','3m'],
+              ['Farah','Build the claim','Peer challenge','4m'],['Dalia','Question it','Cross-check','6m']]
+    .map(f=>`<div class="tick"><b>${f[0]}</b> ${f[1]} → <b>${f[2]}</b><span class="t">${f[3]} ago</span></div>`).join('');
+  return `<div class="kpis">${kpi.map(k=>`<div class="kpi"><div class="v">${k[0]}</div>
+    <div class="l">${k[1]}</div>${k[2]?`<div class="d">${k[2]}</div>`:''}</div>`).join('')}</div>
+    <div class="cmd">
+      <div class="pane"><div class="pane-h">Needs you first<span class="ct">sorted by urgency</span></div>
+        <div class="pane-b">${queue}</div></div>
+      <div><div class="pane" style="margin-bottom:14px"><div class="pane-h">Station load</div><div class="pane-b">${occ}</div></div>
+      <div class="pane"><div class="pane-h">Movement</div><div class="pane-b">${feed}</div></div></div>
+    </div>`;
+}
+
+/* ═══ D2 · CARD WALL ═══ */
+function wall(){
+  const order={help:0,idle:1,busy:2,done:3};
+  const stl={help:['var(--help)','Clarif.'],busy:['var(--busy)','Working'],done:['var(--done)','Finished'],idle:['var(--idle)','Idle']};
+  return `<div class="wall">${[...S].sort((a,b)=>order[a.st]-order[b.st]).map(s=>{
+    const [col,lbl]=stl[s.st];
+    const mini=ST.map(x=>`<i class="${s.done.includes(x.i)?'d':s.at===x.i?'c':''}"></i>`).join('');
+    return `<div class="pcard ${s.st}">
+      <div class="rowa">
+        <span class="av" style="background:${tc(s.t)}">${ini(s.n)}</span>
+        <div><div class="nm2">${s.n}</div><div class="loc">${s.at?ST[s.at-1].n:'not placed'}</div></div>
+        <span class="sts" style="background:color-mix(in srgb,${col} 16%,transparent);color:${col}">${lbl}</span>
+      </div>
+      <span class="fchip" style="background:color-mix(in srgb,${tc(s.t)} 15%,transparent);color:${tc(s.t)}">${tn(s.t)}</span>
+      <div class="fl">${s.f.map(f=>`<span class="fchip ${f[1]}">${f[0]}</span>`).join('')}</div>
+      <div class="mini">${mini}</div>
+    </div>`;}).join('')}</div>`;
+}
+
+/* ═══ D3 · ANALYTICS ═══ */
+function analytics(){
+  const tcount=[0,0,0]; let nd=0;
+  S.forEach(s=>s.t==null?nd++:tcount[s.t]++);
+  const bars=TIERS.map((t,i)=>`<div class="hbar"><span class="hl">${t.n}</span>
+    <span class="ht"><i style="width:${tcount[i]/8*100}%;background:${t.c}"></i></span>
+    <span class="hv">${tcount[i]} · ${Math.round(tcount[i]/8*100)}%</span></div>`).join('')+
+    `<div class="hbar"><span class="hl" style="color:var(--ink3)">No data</span>
+     <span class="ht"><i style="width:${nd/8*100}%;background:var(--line2)"></i></span>
+     <span class="hv">${nd} · ${Math.round(nd/8*100)}%</span></div>`;
+  const dwell=[7,12,9,4,6,0], peak=Math.max(...dwell);
+  const cols=ST.map((s,i)=>`<div class="cb ${dwell[i]===peak?'peak':''}">
+      <u style="height:${dwell[i]/peak*100}%"></u>
+      <div class="cl"><b>${dwell[i]}m</b>${s.n.split(' ')[0]}</div></div>`).join('');
+  const tl=[['Bilal','asked for clarification at Question it','1m'],
+            ['Chen','finished Cross-check — third station done','2m'],
+            ['Eli','flagged: task text above reading age','5m'],
+            ['Hana','joined without benchmark data','9m']]
+    .map(t=>`<div class="ti"><b>${t[0]}</b> ${t[1]}<span>${t[2]} ago</span></div>`).join('');
+  return `<div class="rep">
+    <div class="rcard"><h5>Tier profile <span>benchmark tier</span></h5>${bars}
+      <div class="dstat" style="margin-top:16px">
+        <div><div class="dv">104</div><div class="dl">Mean CAT4 SAS</div></div>
+        <div><div class="dv">11.2</div><div class="dl">Median reading age</div></div>
+        <div><div class="dv" style="color:var(--help)">2</div><div class="dl">Below age</div></div>
+        <div><div class="dv" style="color:var(--busy)">5</div><div class="dl">Flagged</div></div>
+      </div></div>
+    <div class="rcard"><h5>Time at each station <span>class mean</span></h5>
+      <div class="cols">${cols}</div>
+      <p style="font-size:12px;color:var(--ink2);line-height:1.6;margin-top:14px">
+        Question it is absorbing the most time and holds both clarification requests — the likely bottleneck.</p></div>
+    <div class="rcard" style="grid-column:1/-1"><h5>What happened <span>last 10 minutes</span></h5>
+      <div class="tl">${tl}</div></div>
+  </div>`;
+}
+
+/* ═══ concept registry ═══ */
+const C=[
+ {id:'m1',g:'Map',k:'M1',t:'Metro line',render:metro,
+  sub:'Stations become stops on a route. The line itself carries the sequence, so a student can see at a glance where they are, what is behind them and what is next — and a dotted branch shows an extension station without breaking the main line.',
+  meta:[['Best for sequential lessons','good'],['Weak past ~8 stations','warn']],
+  win:['The <b>order is the picture</b> — no legend needed for sequential mode.','Reads instantly on a projector from the back of a room.','Extension stations attach as branches without cluttering the spine.','Genuinely modern; nothing childish about it.'],
+  cost:['Breaks down beyond about eight stations on one line.','Assumes a linear route — poor fit if students roam freely.','Needs a second row of names under each stop, so vertical space is tight on a phone.'],
+  eff:'Medium — SVG line plus a name row. Roughly a day.'},
+
+ {id:'m2',g:'Map',k:'M2',t:'Board columns',render:board,
+  sub:'One column per station, students as chips inside. No metaphor at all — the layout is the information. Column headers carry a status bar so a full station and a stuck station look different from across the room.',
+  meta:[['Scales to any number','good'],['Loses spatial sense','warn']],
+  win:['<b>The most legible option</b> at every screen size, including a phone.','Handles 2 or 20 stations without redesign.','Effortless to scan for "who is where" and "which station is jammed".','Cheapest to build and to maintain.'],
+  cost:['No sense of the physical room — a station is a column, not a place.','Visually plain; it will not impress anyone in a demo.','Movement between stations is invisible without animation.'],
+  eff:'Low — flexbox and chips. Half a day.'},
+
+ {id:'m3',g:'Map',k:'M3',t:'Room floor plan',render:floorplan,
+  sub:'An honest top-down plan of the actual classroom: whiteboard, door, teacher desk, tables where the tables really are. Keeps everything the stadium was doing spatially, and drops the football pitch.',
+  meta:[['Direct stadium replacement','good'],['Needs per-room setup','warn']],
+  win:['<b>Matches what the teacher can see</b> when they look up — the map and the room agree.','Empty seats are visible, so gaps read as gaps.','Believable in front of a head of department in a way a stadium is not.','Students find themselves on it instantly.'],
+  cost:['Each classroom has a different shape — either you accept a generic plan or you build a layout editor.','Fixed table positions cap how many stations fit.','Least useful of the five on a phone.'],
+  eff:'Medium-high — worth a simple drag-to-place editor. Two to three days.'},
+
+ {id:'m4',g:'Map',k:'M4',t:'Constellation',render:constellation,
+  sub:'Stations as nodes with prerequisite edges — the shape your folder already explores, refined. Two paths can converge on one station, which none of the other layouts can express.',
+  meta:[['Handles branching paths','good'],['Already partly built','good']],
+  win:['The only layout that can show <b>a station with two prerequisites</b>.','Animated edges make a moving class feel alive.','Handles non-linear lessons where the others force a false order.','You have a working version of this already.'],
+  cost:['Node positions have to be authored per lesson or auto-laid-out.','Cognitively heavier — students need a moment to read it.','Crowded fast beyond seven or eight nodes.'],
+  eff:'Low — adapt the existing station-layer file. One day.'},
+
+ {id:'m5',g:'Map',k:'M5',t:'Progress matrix',render:matrix,
+  sub:'Students down, stations across. Not a map at all — a completion grid. This is a teacher-only view, and it answers questions the other four cannot.',
+  meta:[['Highest information density','good'],['Teacher only','warn']],
+  win:['<b>Every student and every station in one glance</b>, no scrolling, no clicking.','Instantly exposes a station nobody has cleared.','Prints and screenshots cleanly for evidence in your action research.','Pairs well with any of the four maps as a second tab.'],
+  cost:['Cold and spreadsheet-like — never show it to students.','Says nothing about physical position.','Wraps badly on a phone.'],
+  eff:'Low — a table. Half a day. Best as an addition, not a replacement.'},
+
+ {id:'d1',g:'Dashboard',k:'D1',t:'Command strip',render:command,
+  sub:'A tightened version of what you have. Numbers across the top, then one question answered above all others: who needs you first. Station load and movement sit to the side, not in the way.',
+  meta:[['Closest to current build','good'],['Evolution, not redesign','']],
+  win:['<b>Triage-first</b> — the queue is sorted by urgency, so the top row is the next thing to do.','Familiar; no retraining for anyone already using ClassMap.','Fits a laptop screen without scrolling.','Smallest amount of work of the three.'],
+  cost:['Dense — not readable from across a room.','Six KPIs is close to the limit before they stop being read.','Least distinctive of the three.'],
+  eff:'Low — mostly a restyle of the current dashboard. One day.'},
+
+ {id:'d2',g:'Dashboard',k:'D2',t:'Card wall',render:wall,
+  sub:'One card per student, sorted so whoever needs help floats to the top. Tier, flags, station and a six-segment progress bar all on the card. Built to be readable from the back of the room.',
+  meta:[['Projector-first','good'],['Student-centred','good']],
+  win:['<b>Readable at distance</b> — this is the one to project.','Each student is a whole object, so flags sit next to the name that owns them.','Reorders itself as the lesson moves; the urgent card comes to you.','Works as a phone view too — cards just stack.'],
+  cost:['Uses a lot of space; past about 24 students it needs scrolling or shrinking.','Shows nothing about the class as a whole — no distribution, no trend.','Benchmark data on a projected wall is a privacy decision you must make deliberately.'],
+  eff:'Medium — new component, straightforward. One to two days.'},
+
+ {id:'d3',g:'Dashboard',k:'D3',t:'Analytics report',render:analytics,
+  sub:'The reflective view rather than the live one. Tier distribution, headline benchmark figures, mean time at each station, and a plain-language timeline of what actually happened.',
+  meta:[['Built for your action research','good'],['Not for live use','warn']],
+  win:['<b>The dwell-time chart is your bottleneck detector</b> — it names the station that ate the lesson.','Screenshots straight into a research write-up.','The timeline turns the movement log into something a reader can follow.','Says something about the <i>lesson</i>, not just the students.'],
+  cost:['Too slow to read mid-lesson — this is a between-lessons screen.','Needs the movement log to be complete to be trustworthy.','Charts add code weight to a single-file app.'],
+  eff:'Medium — three chart types, hand-rolled, no library. Two days.'}
+];
+
+/* ═══ wiring ═══ */
+const $=s=>document.querySelector(s);
+let cur='m1';
+function nav(){
+  const groups=['Map','Dashboard'];
+  $('#nav').innerHTML=groups.map(g=>`<div class="nav-group"><i>${g==='Map'?'The room':'The dashboard'}</i>${
+    C.filter(c=>c.g===g).map(c=>`<button class="chip ${c.id===cur?'on':''}" data-c="${c.id}">
+      <span class="n">${c.k}</span>${c.t}</button>`).join('')}</div>`).join('');
+  $('#nav').querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{cur=b.dataset.c;draw();});
+}
+function draw(){
+  const c=C.find(x=>x.id===cur);
+  $('#cTitle').textContent=c.k+' · '+c.t;
+  $('#cSub').textContent=c.sub;
+  $('#cMeta').innerHTML=c.meta.map(m=>`<span class="tag ${m[1]}">${m[0]}</span>`).join('');
+  $('#stage').innerHTML=c.render();
+  $('#notes').innerHTML=`
+    <div class="note win"><h4>What it wins you</h4><ul>${c.win.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="note cost"><h4>What it costs you</h4><ul>${c.cost.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+    <div class="note"><h4>Build effort</h4><ul><li>${c.eff}</li></ul></div>`;
+  nav();
+}
+$('#segT').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  document.body.classList.toggle('dark',b.dataset.t==='dark');
+  $('#segT').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+  draw();
+});
+$('#segW').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  document.body.dataset.w=b.dataset.w;
+  $('#segW').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));
+});
+draw();
+</script>
+</body>
+</html>
