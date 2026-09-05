@@ -1,6 +1,28 @@
 # ClassMap — Benchmark Edition
 
-One self-contained HTML file. Host it anywhere (Netlify Drop, Vercel, GitHub Pages, the school intranet) and share the link. Firebase config is already embedded, so the live classroom sync works as before.
+One self-contained HTML file. Host it anywhere (Netlify Drop, Vercel, GitHub Pages, the school intranet) and share the link.
+
+## Before the first lesson: two Firebase switches
+
+The app signs every device in to Firebase **anonymously** so the database can be closed to the open internet. Two things have to be set once, in the Firebase console for your project:
+
+1. **Build → Authentication → Sign-in method → Anonymous → Enable.**
+2. **Build → Realtime Database → Rules**, then publish:
+
+   ```json
+   {
+     "rules": {
+       "classmap": {
+         ".read": "auth != null",
+         ".write": "auth != null"
+       }
+     }
+   }
+   ```
+
+If anonymous sign-in is off, the teacher's screen shows a red **"Not syncing"** banner naming the cause, and students are told the same thing rather than being told to check their internet. Nothing is silently lost — the app just can't share the class between devices until it's on.
+
+Anonymous sign-in keeps strangers out of the database. It does **not** distinguish one student from another, so the class code remains the only real gate on who joins a lesson.
 
 ---
 
