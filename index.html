@@ -714,6 +714,7 @@ body.theme-cork .field textarea,body.theme-whiteboard .field textarea,body.theme
     <div id="cardBanner"   class="banner banner-card  hide"></div>
     <div id="chatBanner"   class="banner banner-chat  hide"></div>
     <div id="inviteBanner" class="banner banner-invite hide"></div>
+    <div id="syncBanner"   class="banner banner-help  hide"></div>
   </div>
 
   <!-- Legend -->
@@ -971,6 +972,8 @@ body.theme-cork .field textarea,body.theme-whiteboard .field textarea,body.theme
      ════════════════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getDatabase, ref, get, set, remove, query, orderByKey, startAt, endAt }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -988,7 +991,21 @@ const FB_CONFIG = {
 
 // Firebase keys cannot contain  . # $ [ ] /  — encode the app's colon keys.
 const enc = k => encodeURIComponent(k).replace(/\./g,'%2E');
-let _db=null, _fbReady=false, _fbError='';
+let _db=null, _fbReady=false, _fbError='', _authReady=null, _authOK=false;
+
+/* Turn a sign-in failure into something a teacher can act on. */
+function _authFail(e){
+  const code=(e&&e.code)||'';
+  if(/operation-not-allowed|admin-restricted-operation|configuration-not-found/.test(code)){
+    _fbError='Anonymous sign-in is switched off for this Firebase project. '
+            +'Turn it on: Firebase console \u2192 Build \u2192 Authentication \u2192 Sign-in method \u2192 Anonymous \u2192 Enable.';
+  } else if(/network/.test(code)){
+    _fbError='Can\u2019t reach Firebase to sign in. Check the internet connection.';
+  } else {
+    _fbError='Couldn\u2019t sign in to the classroom database ('+(code||(e&&e.message)||'unknown error')+').';
+  }
+}
+
 try{
   if(String(FB_CONFIG.apiKey).startsWith('PASTE_')){
     _fbError='Firebase config not filled in yet.';
@@ -996,28 +1013,42 @@ try{
     const app=initializeApp(FB_CONFIG);
     _db=getDatabase(app);
     _fbReady=true;
+    /* Every read and write happens as an anonymous user, so the database
+       rules can require auth != null rather than being open to the world.
+       Students never see a login — this is invisible to them. */
+    _authReady=signInAnonymously(getAuth(app))
+      .then(()=>{ _authOK=true; })
+      .catch(e=>{ _authFail(e); _authOK=false; });
   }
 }catch(e){ _fbError=e&&e.message?e.message:'Firebase init failed.'; }
+
+/* Hold every database call until the anonymous sign-in has resolved. */
+async function _gate(){
+  if(!_fbReady) throw new Error('fb-not-ready');
+  if(_authReady) await _authReady;
+  if(!_authOK) throw new Error(_fbError||'not-signed-in');
+}
 
 // Expose a tiny async API for the main (classic) script below.
 window.__cmDB = {
   ready:()=>_fbReady,
   error:()=>_fbError,
+  signedIn:()=>_authOK,
   async get(key){
-    if(!_fbReady) throw new Error('fb-not-ready');
+    await _gate();
     const snap=await get(ref(_db,'classmap/'+enc(key)));
     return snap.exists()?snap.val():null;
   },
   async set(key,val){
-    if(!_fbReady) throw new Error('fb-not-ready');
+    await _gate();
     await set(ref(_db,'classmap/'+enc(key)),val);
   },
   async del(key){
-    if(!_fbReady) throw new Error('fb-not-ready');
+    await _gate();
     await remove(ref(_db,'classmap/'+enc(key)));
   },
   async list(prefix){
-    if(!_fbReady) throw new Error('fb-not-ready');
+    await _gate();
     // Range query over encoded keys sharing the prefix.
     const lo=enc(prefix), hi=lo+'\uf8ff';
     const q=query(ref(_db,'classmap'),orderByKey(),startAt(lo),endAt(hi));
@@ -1038,6 +1069,7 @@ let _sharedOK = null;
 
 function _db(){ return (typeof window!=='undefined') ? window.__cmDB : null; }
 function fbReady(){ const d=_db(); return !!(d&&d.ready&&d.ready()); }
+function fbSignedIn(){ const d=_db(); return !!(d&&d.signedIn&&d.signedIn()); }
 function fbError(){ const d=_db(); return d&&d.error?d.error():''; }
 
 async function sGet(key){
@@ -1694,7 +1726,7 @@ async function doLogin(){
           ? '⚙️ This page isn\u2019t set up yet — the teacher needs to add the Firebase config.'
           : '⚠️ Can\u2019t reach the classroom database right now. Check your internet and try again.';
       } else if(_sharedOK===false){
-        err.textContent='⚠️ Can\u2019t reach the classroom database right now. Check your internet and try again.';
+        err.textContent='⚠️ '+(fbError()||'Can\u2019t reach the classroom database right now. Check your internet and try again.');
       } else {
         err.textContent='❌ Code not found. Double-check it with your teacher — the code is case-insensitive.';
       }
@@ -1731,6 +1763,7 @@ function renderBar(){
     THEMES.forEach(t=>b.classList.remove('theme-'+t.id));
     ['taskDock','teacherChat','addStationModal','editStationModal','boardOverlay','dashOverlay','preOverlay','objModal','setModal'].forEach(id=>$('#'+id).classList.add('hide'));
     pendingStudent=null; tierOver={}; bench=defaultBench();
+    const sbx=$('#syncBanner'); if(sbx)sbx.classList.add('hide');
     dashOpen=false; preOpen=false;
     chatTarget=null; show('view-login');
     ['nameInput','codeInput','teacherNameInput','classCodeInput'].forEach(id=>{const el=$('#'+id);if(el)el.value='';});
@@ -3243,6 +3276,15 @@ async function refresh(){
   const myDone=(myRec&&Array.isArray(myRec.done))?myRec.done:[];
   const myUnlocked=(!me.isTeacher&&cfg.sequential)?unlockedSet(myRec):null;
 
+  // Sync banner — if the shared database isn't reachable the class only
+  // exists on this device, which the teacher needs to know immediately.
+  const sb2=$('#syncBanner');
+  if(me.isTeacher&&_sharedOK===false){
+    sb2.classList.remove('hide');
+    sb2.innerHTML='⚠️ <strong>Not syncing.</strong> '+esc(fbError()||'The classroom database is unreachable.')
+      +' Students will not be able to join until this is fixed.';
+  } else sb2.classList.add('hide');
+
   // Help banner (teacher)
   const helpers=students.filter(s=>s.status==='help');
   const hb=$('#helpBanner');
@@ -3677,25 +3719,31 @@ async function pollChat(){
 /* ─── INIT ─── */
 show('view-login');
 
-// Surface Firebase config problems clearly on the login screen.
+// Surface Firebase config and sign-in problems on the login screen.
+// This only ever touches its OWN notice — a message put there by a real
+// login attempt must survive, or the user sees the reason flash and vanish.
+let _cmNotice='';
 function cmCheckBackend(){
   const err=$('#loginErr');
+  const notice=m=>{
+    if(err.textContent===''||err.textContent===_cmNotice){ err.textContent=m; _cmNotice=m; }
+  };
   if(!fbReady()){
-    const msg=fbError()||'Connecting…';
-    if(/not filled in/i.test(msg)){
-      err.textContent='⚙️ Setup needed: paste your Firebase config into this file (see the comment at the top of the file).';
-    } else if(msg!=='Connecting…'){
-      err.textContent='⚠️ Can\u2019t reach the database: '+msg;
-    }
-  } else {
-    // clear any stale "connecting" note once ready
-    if(err.textContent.startsWith('⚙️')||err.textContent.startsWith('⚠️'))err.textContent='';
+    const msg=fbError()||'';
+    if(/not filled in/i.test(msg))
+      notice('⚙️ Setup needed: paste your Firebase config into this file (see the comment at the top of the file).');
+    else if(msg)
+      notice('⚠️ Can\u2019t reach the database: '+msg);
+  } else if(!fbSignedIn()&&fbError()){
+    // Signed-in check failed — usually anonymous sign-in not enabled yet.
+    notice('⚠️ '+fbError());
+  } else if(_cmNotice&&err.textContent===_cmNotice){
+    err.textContent=''; _cmNotice='';
   }
 }
-// Re-check once the Firebase module finishes loading, and shortly after.
+// Re-check as the Firebase module loads and as anonymous sign-in resolves.
 window.addEventListener('cm-db-ready',cmCheckBackend);
-setTimeout(cmCheckBackend,300);
-setTimeout(cmCheckBackend,1500);
+[300,1500,4000].forEach(ms=>setTimeout(cmCheckBackend,ms));
 
 </script>
 </body>

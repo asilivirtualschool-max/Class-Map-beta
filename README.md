@@ -56,8 +56,21 @@ Nothing regroups or re-tiers students on its own. The app produces suggestions w
 ## Getting started
 
 1. **Firebase** — the config in `index.html` points at the project used for the trial. Swap it for your own: Firebase console → new project → Realtime Database → copy the web config into `FB_CONFIG` near the bottom of the file.
-2. **Host it** — drag `index.html` onto [Netlify Drop](https://app.netlify.com/drop), or turn on GitHub Pages for this repo (Settings → Pages → deploy from `main`, root). `index.html` is the whole app.
-3. **Teach** — open the link, choose *I'm the teacher*, pick a class code, set up **⚙️ Benchmarks**, and share the link and code.
+2. **Turn on anonymous sign-in** — Firebase console → Build → Authentication → Sign-in method → Anonymous → Enable. The app signs every device in anonymously; students never see a login. Without this the app will tell you it can't sync.
+3. **Lock the database rules** — Realtime Database → Rules:
+
+   ```json
+   {
+     "rules": {
+       "classmap": {
+         ".read": "auth != null",
+         ".write": "auth != null"
+       }
+     }
+   }
+   ```
+4. **Host it** — drag `index.html` onto [Netlify Drop](https://app.netlify.com/drop), or turn on GitHub Pages for this repo (Settings → Pages → deploy from `main`, root). `index.html` is the whole app.
+5. **Teach** — open the link, choose *I'm the teacher*, pick a class code, set up **⚙️ Benchmarks**, and share the link and code.
 
 Full walkthrough: [`docs/setup-guide.md`](docs/setup-guide.md).
 
@@ -68,7 +81,7 @@ index.html                              the entire application
 docs/setup-guide.md                     teacher-facing set-up walkthrough
 docs/ui-concepts.html                   eight interface concepts, live and clickable
 docs/comparison-nearpod-classkick.md    where this sits against Nearpod, Classkick, Class Charts
-tests/                                  Playwright suites (28 checks)
+tests/                                  Playwright suites (31 checks)
 ```
 
 ## Tests
@@ -78,6 +91,7 @@ npm install playwright
 node tests/benchmarks.test.js    # benchmark engine, student flow, differentiation
 node tests/config.test.js        # alternate school configs, prior-knowledge check, privacy
 node tests/interface.test.js     # room plan, table dragging, dashboard
+node tests/auth.test.js          # what the user sees when Firebase sign-in fails
 ```
 
 Each suite runs against a copy of `index.html` with the Firebase key stubbed, so tests never write to a live classroom database. Create it with:
@@ -89,7 +103,7 @@ sed 's/apiKey: .*/apiKey: "PASTE_TEST_LOCAL_ONLY",/' index.html > /tmp/test.html
 ## Known limitations
 
 - **Benchmark scores are self-reported.** Students type their own figures. There's no roster import and no MIS integration, so check the dashboard in the first few minutes of a lesson and use the tier override freely.
-- **The Realtime Database runs in test mode.** Anyone with the URL can read and write. Fine for a controlled trial; lock the rules down before wider use.
+- **Access control is anonymous, not per-user.** Anonymous sign-in keeps the database closed to the open internet, but it does not tell one student from another — anyone who can load the page can sign in. Treat class codes as the only real gate, and don't put anything in here you wouldn't put on a classroom wall.
 - **No student work is captured.** This tracks where students are and what they need, not what they produced. Pair it with something that does if you need evidence of learning.
 - **Nothing persists across lessons.** Each class is a code and a session; there's no progress history.
 - **One lesson at a time.** This is deliberately not a platform.

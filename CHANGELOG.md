@@ -21,7 +21,13 @@
 - Dashboard rebuilt as a command strip: KPI row, a triage queue that leads on who needs you first, tier profile, station load, movement ticker.
 - Eight interface concepts kept in `docs/ui-concepts.html` for reference.
 
+### Security
+- Anonymous Firebase sign-in on every device, so the database rules can require `auth != null` instead of being open to the internet. Students never see a login.
+- A standing "Not syncing" banner on the teacher's screen whenever the shared database is unreachable, naming the cause and the consequence.
+- Sign-in failures now name the actual problem — including "anonymous sign-in is switched off", with the console path to fix it — instead of blaming the internet.
+
 ### Fixes
+- The login screen's startup health-check was wiping any error a real login attempt had just displayed, so the reason flashed up and vanished after 1.5 seconds. It now only clears its own notice.
 - Student benchmark data was being wiped when leaving a station.
 - The first tap on a station could serve the untiered task version before the tier resolved.
 - Benchmark coverage under-counted students who had a reading age but no standardised score.
