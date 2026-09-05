@@ -1,7 +1,7 @@
 # Tests
 
-Playwright suites covering the benchmark engine, the school configuration, and the interface.
-28 checks across three files.
+Playwright suites covering the benchmark engine, the school configuration, the interface, and
+Firebase sign-in failures. 31 checks across four files.
 
 ## Running them
 
@@ -12,6 +12,7 @@ sed 's/apiKey: .*/apiKey: "PASTE_TEST_LOCAL_ONLY",/' ../index.html > /tmp/test.h
 node benchmarks.test.js
 node config.test.js
 node interface.test.js
+node auth.test.js
 ```
 
 Stubbing the API key matters: with a real key the suites would write test classes into a live
@@ -30,6 +31,11 @@ tier-correct task delivery, the class profile, grouping, and config round-trippi
 **config.test.js** — a school running MAP only on two tiers, required benchmarks, RIT anchored to a
 school mean, the prior-knowledge check running after the benchmark step, blended grouping, mixed
 group shape, and the privacy switch that strips raw scores.
+
+**auth.test.js** — stubs a project where anonymous sign-in has not been enabled, and checks that the
+teacher gets a standing "Not syncing" banner naming both cause and consequence, that a student on a
+*separate* device (no localStorage cache to mask it) is told the real reason rather than to check
+their internet, and that the banner clears once sign-in succeeds.
 
 **interface.test.js** — room furniture, four seats per table, dragging a table and its position
 persisting through a re-render, drags not opening the edit modal, layout reset, and the dashboard

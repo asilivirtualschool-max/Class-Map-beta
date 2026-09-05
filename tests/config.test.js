@@ -59,6 +59,7 @@ const {chromium}=require('playwright');
     await page.waitForSelector('#view-map:not(.hide)');
     await page.click('#preLearnBtn');
     await page.waitForSelector('#preOverlay:not(.hide)');
+    await page.waitForSelector('#editObjBtn');            // panel renders async
     await page.click('#editObjBtn');                      // no PLA yet → set objective
     await page.waitForSelector('#objModal:not(.hide)');
     await page.fill('#objText','Students will balance chemical equations.');
