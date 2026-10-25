@@ -586,6 +586,156 @@ body.can-arrange .floor>.station{cursor:grab}
 .kcell .kl{font-size:10px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-top:5px}
 .kcell .kd{font-size:10px;color:var(--muted);opacity:.75;margin-top:2px;font-family:'DM Mono'}
 
+/* ══════════════════════════════════════════════════════════════
+   CLASS WALL · groups share finished work, everyone can view it
+   ══════════════════════════════════════════════════════════════ */
+.maphead-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.wall-btn{position:relative}
+.wall-badge{position:absolute;top:-7px;right:-7px;min-width:19px;height:19px;padding:0 5px;border-radius:99px;
+  background:var(--go);color:#0a2a1c;font-size:10.5px;font-weight:800;display:grid;place-items:center;font-family:'DM Sans';
+  box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.wall-badge.pend{background:var(--accent2);color:#fff}
+#wallOverlay{z-index:92}
+.wall-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;flex:none}
+.wall-head h1{font-family:'Bebas Neue';font-size:40px;letter-spacing:3px;color:var(--purple);line-height:1}
+.wall-prompt{font-size:14px;color:var(--text);opacity:.85;margin-top:6px;max-width:720px;line-height:1.45}
+.wall-prompt b{color:var(--purple);font-size:10.5px;letter-spacing:.08em;display:block;margin-bottom:2px}
+.wall-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wall-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;flex:none}
+.wall-seg{display:inline-flex;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px}
+.wall-seg button{border:none;background:none;color:var(--muted);font:600 12px 'DM Sans';padding:6px 12px;border-radius:7px;cursor:pointer}
+.wall-seg button.on{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.25)}
+.wall-tset{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-left:auto;font-size:12px;font-weight:600;color:var(--muted)}
+.wall-tset label{display:inline-flex;gap:6px;align-items:center;cursor:pointer}
+.wall-tset input{accent-color:var(--purple);width:15px;height:15px}
+.wall-note{font-size:12px;font-weight:600;padding:9px 13px;border-radius:10px;background:rgba(245,166,35,.12);color:var(--warn);flex:none}
+
+.wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;align-items:start;flex:none}
+.wall-shelf{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,290px);gap:16px;overflow-x:auto;
+  align-items:start;padding-bottom:10px;flex:none}
+.wall-col-h{display:flex;align-items:center;gap:8px;font-weight:800;font-size:13px;padding:10px 12px;border-radius:12px;
+  background:var(--surface);border:1px solid var(--border);border-top:4px solid var(--wc,var(--accent));margin-bottom:12px}
+.wall-col-h .ct{margin-left:auto;font-family:'DM Mono';font-size:11px;font-weight:400;color:var(--muted)}
+.wall-col .wcard{margin-bottom:14px}
+.wall-empty{border:2px dashed var(--border);border-radius:18px;padding:56px 20px;text-align:center;color:var(--muted);
+  font-size:14px;line-height:1.6;flex:none}
+.wall-empty .big{font-size:42px;display:block;margin-bottom:6px}
+
+.wcard{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative;
+  box-shadow:0 6px 22px rgba(0,0,0,.22);cursor:pointer;transition:transform .15s,box-shadow .15s;
+  border-top:5px solid var(--wc,var(--accent))}
+.wcard:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.wcard.is-pending{opacity:.92;outline:2px dashed var(--warn);outline-offset:-2px}
+.wcard.is-hidden{opacity:.45}
+.wc-media{position:relative;aspect-ratio:4/3;background:var(--surface2);overflow:hidden}
+.wc-media img{width:100%;height:100%;object-fit:cover;display:block}
+.wc-media img:not([src]){visibility:hidden}
+.wc-count{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.62);color:#fff;font-size:11px;font-weight:700;
+  padding:3px 8px;border-radius:99px}
+.wc-flags{position:absolute;left:8px;top:8px;display:flex;gap:5px;flex-wrap:wrap;z-index:2}
+.wc-flag{background:rgba(0,0,0,.66);color:#fff;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px}
+.wc-flag.pend{background:var(--warn);color:#2a1a00}
+.wc-flag.pin{background:var(--purple)}
+.wc-body{padding:12px 14px 10px}
+.wc-flags.static{position:static;margin-bottom:8px}
+.wc-title{font-weight:800;font-size:15px;line-height:1.3;word-break:break-word}
+.wc-note{font-size:13px;line-height:1.5;color:var(--text);opacity:.85;margin-top:5px;white-space:pre-wrap;word-break:break-word;
+  max-height:6em;overflow:hidden}
+.wc-link{display:flex;align-items:center;gap:7px;margin-top:9px;padding:8px 10px;border-radius:10px;background:var(--surface2);
+  border:1px solid var(--border);font-size:12px;font-weight:650;color:var(--text);text-decoration:none;overflow:hidden}
+.wc-link span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wc-link:hover{border-color:var(--accent)}
+.wc-foot{display:flex;align-items:center;gap:8px;padding:9px 14px 12px;font-size:11.5px;color:var(--muted)}
+.wc-grp{display:inline-flex;align-items:center;gap:5px;font-weight:800;color:var(--text);max-width:60%}
+.wc-grp i{width:9px;height:9px;border-radius:50%;background:var(--wc,var(--accent));flex:none}
+.wc-grp span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wc-names{font-size:11.5px;color:var(--muted);padding:0 14px;line-height:1.4}
+.wc-time{margin-left:auto;font-family:'DM Mono';font-size:10.5px;white-space:nowrap}
+.wc-star{border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:99px;padding:3px 9px;
+  font:700 11.5px 'DM Sans';cursor:pointer;display:inline-flex;gap:4px;align-items:center}
+.wc-star.on{background:rgba(255,209,102,.2);border-color:rgba(255,209,102,.6);color:#e0a800}
+.wc-star:disabled{cursor:default;opacity:.85}
+.wc-tools{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px}
+.wc-tools .mini-btn{font-size:10.5px;padding:5px 9px}
+.mini-btn.go{color:var(--go)}
+
+/* composer */
+#wallCompose{z-index:96}
+#wallCompose .modal-box{max-width:560px}
+.wcp-prompt{background:rgba(192,132,252,.1);border:1px solid rgba(192,132,252,.28);border-radius:12px;padding:10px 13px;
+  font-size:13px;line-height:1.5;margin-bottom:16px}
+.wcp-prompt b{display:block;font-size:10px;letter-spacing:.08em;color:var(--purple);margin-bottom:2px}
+.wcp-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:2px dashed var(--border);
+  border-radius:14px;padding:20px 12px;cursor:pointer;text-align:center;font-weight:700;font-size:14px;transition:border-color .15s,background .15s}
+.field label.wcp-drop{display:flex;font-size:14px;color:var(--text);letter-spacing:0;margin-bottom:0}
+@media(max-width:600px){.wall-head h1{font-size:28px;letter-spacing:2px}.wall-tset{margin-left:0}}
+.wcp-drop small{font-weight:500;font-size:11.5px;color:var(--muted)}
+.wcp-drop:hover,.wcp-drop.over{border-color:var(--purple);background:rgba(192,132,252,.07)}
+.wcp-drop.full{opacity:.5;pointer-events:none}
+.wcp-thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.wcp-thumbs:empty{display:none}
+.wcp-th{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--surface2);border:1px solid var(--border)}
+.wcp-th img{width:100%;height:100%;object-fit:cover;display:block}
+.wcp-th button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(0,0,0,.7);
+  color:#fff;font-size:12px;cursor:pointer;line-height:22px;padding:0}
+.wcp-th .cover{position:absolute;left:4px;bottom:4px;background:var(--purple);color:#fff;font-size:9.5px;font-weight:800;
+  padding:2px 6px;border-radius:99px}
+.wcp-th.busy{display:grid;place-items:center;font-size:11px;color:var(--muted)}
+.wcp-names{display:flex;flex-wrap:wrap;gap:6px}
+.wcp-name{border:1.5px solid var(--border);background:var(--surface2);color:var(--text);border-radius:99px;padding:5px 11px;
+  font:600 12px 'DM Sans';cursor:pointer}
+.wcp-name.on{background:var(--purple);border-color:var(--purple);color:#fff}
+.wcp-name:disabled{cursor:default}
+.wcp-hint{font-size:11px;color:var(--muted);margin-top:6px}
+.wcp-status{font-size:12.5px;font-weight:600;min-height:18px;margin-top:4px;color:var(--muted)}
+.wcp-status.err{color:var(--accent2)}
+
+/* lightbox */
+.wl-overlay{position:fixed;inset:0;z-index:98;background:rgba(6,7,12,.95);display:grid;grid-template-columns:1fr 340px}
+@media(max-width:860px){.wl-overlay{grid-template-columns:1fr;grid-template-rows:1fr auto;overflow-y:auto}}
+.wl-stage{position:relative;display:flex;align-items:center;justify-content:center;padding:56px 64px 40px;min-height:0}
+@media(max-width:860px){.wl-stage{padding:52px 12px 20px;min-height:55vh}}
+.wl-stage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.6);transition:filter .2s}
+.wl-stage img.loading{filter:blur(6px) brightness(.85)}
+.wl-noimg{max-width:640px;width:100%;background:var(--surface);color:var(--text);border-radius:18px;padding:28px 30px;
+  font-size:17px;line-height:1.6;white-space:pre-wrap;word-break:break-word;border-top:6px solid var(--wc,var(--accent))}
+.wl-noimg h2{font-size:24px;margin-bottom:10px;line-height:1.25}
+.wl-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.12);color:#fff;font-size:26px;cursor:pointer;display:grid;place-items:center}
+.wl-nav:hover{background:rgba(255,255,255,.24)}
+.wl-nav.prev{left:10px}.wl-nav.next{right:10px}
+.wl-close{position:absolute;top:12px;right:12px;z-index:3}
+.wl-pos{position:absolute;top:18px;left:18px;color:rgba(255,255,255,.7);font:600 12px 'DM Mono'}
+.wl-dots{position:absolute;bottom:14px;left:0;right:0;display:flex;justify-content:center;gap:6px}
+.wl-dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3)}
+.wl-dots i.on{background:#fff}
+.wl-side{background:var(--surface);color:var(--text);padding:24px 22px;overflow-y:auto;border-left:1px solid var(--border)}
+.wl-side .wl-grp{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:12px;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--muted)}
+.wl-side .wl-grp i{width:10px;height:10px;border-radius:50%;background:var(--wc,var(--accent))}
+.wl-side h2{font-size:22px;line-height:1.25;margin:8px 0 6px;word-break:break-word}
+.wl-side .wl-names{font-size:13px;color:var(--muted);line-height:1.5}
+.wl-side .wl-text{font-size:14px;line-height:1.6;margin-top:14px;white-space:pre-wrap;word-break:break-word}
+.wl-side .wc-link{margin-top:14px}
+.wl-side .wl-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
+.wl-side .wl-time{font-family:'DM Mono';font-size:11px;color:var(--muted);margin-top:14px}
+
+/* dashboard pane */
+.dwall{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.dwall .dw{aspect-ratio:4/3;border-radius:9px;overflow:hidden;background:var(--surface2);cursor:pointer;position:relative;
+  border-top:3px solid var(--wc,var(--accent))}
+.dwall .dw img{width:100%;height:100%;object-fit:cover;display:block}
+.dwall .dw img:not([src]){visibility:hidden}
+.dwall .dw span{position:absolute;inset:auto 0 0 0;padding:14px 7px 5px;font-size:10.5px;font-weight:700;color:#fff;
+  background:linear-gradient(transparent,rgba(0,0,0,.75));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dwall .dw.txt{display:flex;align-items:center;justify-content:center;padding:8px;text-align:center;font-size:11.5px;font-weight:700}
+.dwall .dw.txt span{display:none}
+.dw-pend{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;margin-bottom:9px;
+  background:rgba(245,166,35,.12);color:var(--warn);font-size:12.5px;font-weight:700}
+.dw-pend .mini-btn{margin-left:auto}
+.dw-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:var(--muted)}
+.dw-empty{font-size:12.5px;color:var(--muted);padding:6px 4px 2px}
+
 /* THEMES */
 body.theme-cork{--bg:#8b5e2e;--surface:rgba(255,248,235,.95);--surface2:rgba(240,224,195,.8);--text:#2c1a08;--border:rgba(100,60,20,.2);--muted:rgba(44,26,8,.5);background:#a06830}
 body.theme-cork::before{display:none}
@@ -673,7 +823,10 @@ body.theme-cork .field textarea,body.theme-whiteboard .field textarea,body.theme
 <section id="view-map" class="hide">
   <div class="maphead">
     <div><h2 id="mapTitle">The Classroom</h2><div class="sub" id="mapSub"></div></div>
-    <span class="code-badge" id="mapCodeBadge">CODE: —</span>
+    <div class="maphead-r">
+      <button class="btn btn-purple btn-sm wall-btn" id="wallBtn">🖼 Class Wall<span class="wall-badge hide" id="wallBadge"></span></button>
+      <span class="code-badge" id="mapCodeBadge">CODE: —</span>
+    </div>
   </div>
 
   <!-- Teacher controls -->
@@ -690,6 +843,7 @@ body.theme-cork .field textarea,body.theme-whiteboard .field textarea,body.theme
     <div class="t-divider"></div>
     <div class="t-grp">
       <button class="btn btn-go btn-sm" id="showDashBtn">📊 Dashboard</button>
+      <button class="btn btn-ghost btn-sm" id="showWallBtn">🖼 Class Wall</button>
       <button class="btn btn-accent btn-sm" id="preLearnBtn">🧠 Pre-Learning</button>
       <button class="btn btn-purple btn-sm" id="addBonusBtn">＋ Add Station</button>
       <button class="btn btn-ghost btn-sm" id="showBoardBtn">📋 Clarification Board</button>
@@ -759,6 +913,7 @@ body.theme-cork .field textarea,body.theme-whiteboard .field textarea,body.theme
         <button class="btn btn-card" id="aCardMe">🃏 I need a card</button>
         <button class="btn btn-card" id="aCardGroup">🃏 We need a card</button>
         <button class="btn btn-go full" id="aDone">✅ Finished!</button>
+        <button class="btn btn-purple full" id="aShare">📤 Share our work on the Class Wall</button>
         <button class="btn btn-ghost" id="aNext">➡ Next task</button>
         <button class="btn btn-ghost" id="aLeave">← Leave</button>
       </div>
@@ -946,11 +1101,92 @@ body.theme-cork .field textarea,body.theme-whiteboard .field textarea,body.theme
         <div class="cpane-b tight" id="dashStations"></div>
       </div>
       <div class="cpane">
+        <div class="cpane-h">🖼 Class Wall<span class="ct" id="dashWallCt"></span></div>
+        <div class="cpane-b" id="dashWall"></div>
+      </div>
+      <div class="cpane">
         <div class="cpane-h">🔄 Movement<span class="ct">most recent first</span></div>
         <div class="cpane-b tight dash-feed" id="dashFeed"></div>
       </div>
     </div>
   </div>
+</div>
+
+<!-- ═══ CLASS WALL ═══ -->
+<div id="wallOverlay" class="dash-overlay hide">
+  <div class="wall-head">
+    <div>
+      <h1 id="wallTitle">CLASS WALL</h1>
+      <div class="wall-prompt" id="wallPrompt"></div>
+    </div>
+    <div class="wall-actions">
+      <button class="btn btn-purple btn-sm" id="wallAddBtn">📤 Share work</button>
+      <button class="btn btn-ghost btn-sm" id="closeWallBtn">✕ Close</button>
+    </div>
+  </div>
+  <div class="wall-bar">
+    <div class="wall-seg" id="wallViewSeg">
+      <button data-v="new" class="on">🕒 Newest</button>
+      <button data-v="table">🪑 By table</button>
+    </div>
+    <span class="ct" id="wallCount" style="font-family:'DM Mono';font-size:12px;color:var(--muted)"></span>
+    <div class="wall-tset hide" id="wallTeacherSet">
+      <label title="Students can add new posts"><input type="checkbox" id="wallPostingToggle"> Posting open</label>
+      <label title="Student posts wait for you before the class sees them"><input type="checkbox" id="wallApproveToggle"> Approve before showing</label>
+      <button class="mini-btn" id="wallPromptBtn">✏️ Prompt</button>
+      <button class="mini-btn danger" id="wallClearBtn">🗑 Clear wall</button>
+    </div>
+  </div>
+  <div id="wallNotice" class="wall-note hide"></div>
+  <div id="wallBody"></div>
+</div>
+
+<!-- ═══ CLASS WALL · COMPOSER ═══ -->
+<div id="wallCompose" class="modal-overlay hide">
+  <div class="modal-box">
+    <h3 id="wcpHead">SHARE YOUR WORK</h3>
+    <p class="modal-sub" id="wcpSub">Add a photo of what your group made, a link, or a short note. The whole class will see it on the Class Wall.</p>
+    <div class="wcp-prompt hide" id="wcpPrompt"><b>YOUR TEACHER ASKED FOR</b><span id="wcpPromptTxt"></span></div>
+    <div class="field"><label>TITLE</label>
+      <input id="wcpTitle" maxlength="70" placeholder="e.g. Our food chain poster" autocomplete="off"></div>
+    <div class="field"><label>PHOTOS <span style="font-weight:400;opacity:.7">· up to 4</span></label>
+      <label class="wcp-drop" id="wcpDrop">
+        <input type="file" id="wcpFile" accept="image/*" multiple hidden>
+        📷 Take or choose photos
+        <small>Posters, whiteboards, models, worksheets. Big photos are shrunk automatically.</small>
+      </label>
+      <div class="wcp-thumbs" id="wcpThumbs"></div>
+    </div>
+    <div class="field"><label>LINK <span style="font-weight:400;opacity:.7">· optional: Google Slides, Canva, OneDrive, YouTube…</span></label>
+      <input id="wcpLink" maxlength="500" placeholder="https://…" autocomplete="off" spellcheck="false"></div>
+    <div class="field"><label>WHAT DID YOU DO? <span style="font-weight:400;opacity:.7">· optional</span></label>
+      <textarea id="wcpNote" maxlength="600" placeholder="Tell the class what this shows or what you found out…"></textarea></div>
+    <div class="field" id="wcpGroupField"><label>GROUP</label>
+      <input id="wcpGroup" maxlength="40" placeholder="e.g. Station Two · The Producers" autocomplete="off"></div>
+    <div class="field" id="wcpNamesField"><label>WHO WORKED ON THIS?</label>
+      <div class="wcp-names" id="wcpNames"></div>
+      <div class="wcp-hint">Tap names to add or remove them. Everyone you tick can edit this post.</div>
+    </div>
+    <div class="wcp-status" id="wcpStatus"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="wcpCancel">Cancel</button>
+      <button class="btn btn-purple" id="wcpSave">📌 Post to wall</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CLASS WALL · VIEWER ═══ -->
+<div id="wallLight" class="wl-overlay hide">
+  <div class="wl-stage" id="wlStage">
+    <span class="wl-pos" id="wlPos"></span>
+    <button class="wl-nav prev" id="wlPrev" aria-label="Previous">‹</button>
+    <img id="wlImg" alt="">
+    <div class="wl-noimg hide" id="wlNoImg"></div>
+    <button class="wl-nav next" id="wlNext" aria-label="Next">›</button>
+    <div class="wl-dots" id="wlDots"></div>
+  </div>
+  <aside class="wl-side" id="wlSide"></aside>
+  <button class="btn btn-ghost btn-sm wl-close" id="wlClose">✕ Close</button>
 </div>
 
 <!-- ════════════════════════════════════════════════════════════════
@@ -1055,6 +1291,16 @@ window.__cmDB = {
     const snap=await get(q);
     const out=[];
     if(snap.exists())snap.forEach(c=>{ out.push(decodeURIComponent(c.key)); });
+    return out;
+  },
+  async listVals(prefix){
+    // Same range query, but keep the values: one round trip for a whole set.
+    await _gate();
+    const lo=enc(prefix), hi=lo+'\uf8ff';
+    const q=query(ref(_db,'classmap'),orderByKey(),startAt(lo),endAt(hi));
+    const snap=await get(q);
+    const out={};
+    if(snap.exists())snap.forEach(c=>{ out[decodeURIComponent(c.key)]=c.val(); });
     return out;
   }
 };
@@ -1761,7 +2007,8 @@ function renderBar(){
     plaData=null; plaAnswers=[]; plaQ=0; genQuestions=null;
     const b=document.body; b.classList.remove('docked','station-min');
     THEMES.forEach(t=>b.classList.remove('theme-'+t.id));
-    ['taskDock','teacherChat','addStationModal','editStationModal','boardOverlay','dashOverlay','preOverlay','objModal','setModal'].forEach(id=>$('#'+id).classList.add('hide'));
+    ['taskDock','teacherChat','addStationModal','editStationModal','boardOverlay','dashOverlay','preOverlay','objModal','setModal','wallOverlay','wallCompose','wallLight'].forEach(id=>$('#'+id).classList.add('hide'));
+    wallOpen=false; wallLoaded=false; wallSig=null; wallPosts=[]; wallLikes={}; wallRenderSig='';
     pendingStudent=null; tierOver={}; bench=defaultBench();
     const sbx=$('#syncBanner'); if(sbx)sbx.classList.add('hide');
     dashOpen=false; preOpen=false;
@@ -1785,6 +2032,7 @@ async function enterMap(){
   renderBar();
   await refresh();          // resolve config + tier BEFORE the map is tappable
   show('view-map'); startPoll();
+  wallTick(true);           // load the Class Wall badge
 }
 
 /* ─── THEME BAR ─── */
@@ -2876,7 +3124,7 @@ async function showBoard(){
 
 /* ─── STUDENT DASHBOARD ─── */
 let dashOpen=false;
-$('#showDashBtn').onclick=()=>{dashOpen=true;$('#dashOverlay').classList.remove('hide');renderDashboard();};
+$('#showDashBtn').onclick=()=>{dashOpen=true;$('#dashOverlay').classList.remove('hide');renderDashboard();renderDashWall();wallTick(true);};
 $('#closeDashBtn').onclick=()=>{dashOpen=false;$('#dashOverlay').classList.add('hide');};
 
 function timeAgo(ts){
@@ -3702,8 +3950,682 @@ async function teacherSend(){
   await sSet(kChat(chatTarget),c);renderChatLog($('#tChatLog'),c.messages,false);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   CLASS WALL
+   ────────────────────────────────────────────────────────────────────
+   A Padlet-style board for the class. Groups post the results of their
+   work (photos, a link, a short note); everyone in the class can view
+   it, star it, and open it full-screen. The teacher can pin, hide,
+   approve, or delete any post, and open or close posting.
+
+   Storage — everything stays in the Realtime Database, no Firebase
+   Storage bucket needed:
+     wall:CODE              {posting, approve, prompt}     settings
+     wallv:CODE             {ts,r}  "something changed" stamp. Devices poll
+                            only this tiny key and reload the wall when it
+                            moves, so an idle wall costs almost nothing.
+     wpost:CODE:<id>        post metadata (small)
+     wthumb:CODE:<id>       cover thumbnail, ~520px JPEG (~30–60 KB)
+     wimg:CODE:<id>:<n>     full photo n, ≤1600px JPEG (≤ ~280 KB)
+     wlike:CODE:<name>      {postId:true} — each student writes only their
+                            own key, so two stars at once never collide.
+   Photos are shrunk in the browser before upload. Thumbnails and photos
+   never change once written (an edit bumps the post's version), so each
+   device downloads each one once and caches it.
+   ════════════════════════════════════════════════════════════════════ */
+const K_WALL  = ()     => 'wall:'+classCode;
+const K_WALLV = ()     => 'wallv:'+classCode;
+const kWPost  = id     => 'wpost:'+classCode+':'+id;
+const kWThumb = id     => 'wthumb:'+classCode+':'+id;
+const kWImg   = (id,n) => 'wimg:'+classCode+':'+id+':'+n;
+const kWLike  = n      => 'wlike:'+classCode+':'+n;
+
+const WALL_MAX_PHOTOS = 4;
+const WALL_MAX_CHARS  = 380000;   // data-URL length cap per photo (~280 KB)
+const WALL_COLORS = ['#6c63ff','#ff6b6b','#3ecf8e','#f5a623','#4dabf7','#c084fc','#ff8fab','#2ec4b6','#e9b949','#8d99ae','#ef476f','#06d6a0'];
+
+let wallOpen=false, wallLoaded=false, wallSig=null, wallTickN=0, wallRenderSig='';
+let wallPosts=[], wallLikes={}, wallView='new';
+let wallCfg={posting:true,approve:false,prompt:''};
+const _wThumb={}, _wFull={};       // immutable image caches: "id@v" / "id@v:n"
+
+/* ─── storage helpers ─── */
+// Read every key under a prefix WITH its value in one round trip.
+// When the shared database answers, its answer is the truth (so a post the
+// teacher deleted disappears everywhere); the local cache is only used offline.
+async function sListVals(prefix){
+  const d=_db();
+  if(d&&d.ready&&d.ready()&&d.listVals){
+    try{ const o=await d.listVals(prefix); _sharedOK=true; return o||{}; }catch(e){ _sharedOK=false; }
+  }
+  const out={};
+  try{ for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);
+    if(k&&k.startsWith('cm_'+prefix)){try{out[k.slice(3)]=JSON.parse(localStorage.getItem(k));}catch(e){}}} }catch(e){}
+  for(const k in _mem){ if(k.startsWith(prefix)&&!(k in out)){ try{out[k]=JSON.parse(_mem[k]);}catch(e){} } }
+  return out;
+}
+// Photos are big: write them to the shared database and memory only. Filling
+// localStorage with photos would crowd out the small records the app relies on
+// when offline. Returns false when the shared write failed.
+async function wPutBlob(key,val){
+  _mem[key]=JSON.stringify(val);
+  const d=_db();
+  if(d&&d.ready&&d.ready()){
+    try{ await d.set(key,val); _sharedOK=true; return true; }catch(e){ _sharedOK=false; return false; }
+  }
+  try{ localStorage.setItem('cm_'+key,_mem[key]); }catch(e){}
+  return true;   // no shared database configured — this device only
+}
+function wSharedFailed(){ return fbReady() && _sharedOK===false; }
+async function bumpWall(){ await sSet(K_WALLV(),{ts:Date.now(),r:Math.random().toString(36).slice(2,8)}); }
+
+/* ─── small helpers ─── */
+const isImgData = s => typeof s==='string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(s);
+function wallAgo(ts){
+  if(!ts)return '';
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return 'just now';
+  const m=Math.floor(s/60); if(m<60)return m+'m ago';
+  const h=Math.floor(m/60); if(h<24)return h+'h ago';
+  const d=Math.floor(h/24); if(d<7)return d+'d ago';
+  return new Date(ts).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+}
+function wallColor(p){
+  if(typeof p.station==='number')return WALL_COLORS[(p.station-1)%WALL_COLORS.length];
+  if(p.station)return 'var(--purple)';
+  return p.byTeacher?'var(--go)':'var(--accent)';
+}
+function wallGroupLabel(p){ return p.group||(p.byTeacher?'Teacher':(p.station!=null?labelFor(p.station):'Class')); }
+function wallNames(p){ return Array.isArray(p.names)?p.names.filter(Boolean):[]; }
+function linkInfo(u){
+  try{
+    const url=new URL(u); const h=url.hostname.replace(/^www\./,'');
+    const kinds=[
+      [/docs\.google\.com\/presentation/,'🟨','Google Slides'],[/docs\.google\.com\/document/,'🟦','Google Doc'],
+      [/docs\.google\.com\/spreadsheets/,'🟩','Google Sheet'],[/docs\.google\.com\/forms|forms\.gle/,'🟪','Google Form'],
+      [/drive\.google\.com/,'📁','Google Drive'],[/canva\.(com|link)/,'🎨','Canva'],
+      [/youtube\.com|youtu\.be/,'▶️','YouTube'],[/sharepoint\.com|onedrive\.live\.com|1drv\.ms/,'☁️','OneDrive'],
+      [/padlet\.com/,'🧱','Padlet'],[/scratch\.mit\.edu/,'🐱','Scratch'],[/flip\.com/,'🎥','Flip']];
+    for(const [re,ic,lb] of kinds) if(re.test(url.hostname+url.pathname)) return {icon:ic,label:lb};
+    return {icon:'🔗',label:h};
+  }catch(e){ return {icon:'🔗',label:'Link'}; }
+}
+function ytThumb(u){
+  try{
+    const url=new URL(u); const host=url.hostname.replace(/^(www|m)\./,'');
+    let id=null;
+    if(host==='youtu.be')id=url.pathname.slice(1).split('/')[0];
+    else if(host==='youtube.com')id=url.searchParams.get('v')||((url.pathname.match(/\/(shorts|embed|live)\/([\w-]+)/)||[])[2]);
+    return (id&&/^[\w-]{6,20}$/.test(id))?'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg':null;
+  }catch(e){ return null; }
+}
+function linkChip(p){
+  const u=safeUrl(p.link); if(!u)return '';
+  const li=linkInfo(u);
+  return `<a class="wc-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer" data-stop="1">${li.icon} <span>Open ${esc(li.label)}</span></a>`;
+}
+
+/* ─── who can see / change what ─── */
+function isMinePost(p){ return !me.isTeacher && (p.by===me.name || wallNames(p).includes(me.name)); }
+function canEditPost(p){ return me.isTeacher || isMinePost(p); }
+function canSeePost(p){ return me.isTeacher || isMinePost(p) || (!p.hidden && p.status!=='pending'); }
+function visiblePosts(){
+  return wallPosts.filter(canSeePost).sort((a,b)=>((b.pinned?1:0)-(a.pinned?1:0))||((b.ts||0)-(a.ts||0)));
+}
+
+/* ─── load ─── */
+async function loadWall(){
+  wallCfg=Object.assign({posting:true,approve:false,prompt:''},(await sGet(K_WALL()))||{});
+  const posts=await sListVals('wpost:'+classCode+':');
+  wallPosts=Object.values(posts).filter(p=>p&&typeof p==='object'&&p.id);
+  const pre='wlike:'+classCode+':';
+  const likes=await sListVals(pre);
+  wallLikes={};
+  for(const k in likes){
+    const nm=k.slice(pre.length), o=likes[k]||{};
+    for(const pid in o) if(o[pid]) (wallLikes[pid]=wallLikes[pid]||new Set()).add(nm);
+  }
+  wallLoaded=true;
+}
+
+/* Poll hook — called from the main 2.5 s loop. With the wall closed it
+   checks the tiny change stamp every 10 s (for the badge); open, every tick. */
+async function wallTick(force){
+  if(!classCode||!me.name)return;
+  wallTickN++;
+  const wlOpen=!$('#wallLight').classList.contains('hide');
+  const busy=wallOpen||dashOpen||wlOpen;
+  if(!force&&!busy&&wallLoaded&&wallTickN%4!==1)return;
+  const v=await sGet(K_WALLV());
+  const sig=v?(v.ts+':'+v.r):'0';
+  if(force||!wallLoaded||sig!==wallSig){
+    wallSig=sig;
+    await loadWall();
+    if(wallOpen)renderWall();
+    if(dashOpen)renderDashWall();
+    if(wlOpen)wlRefresh();
+  }
+  updateWallBadge();
+}
+
+/* ─── badge on the map's Class Wall button ─── */
+function wallSeenKey(){ return 'cmw_seen|'+classCode+'|'+(me.isTeacher?'#teacher':me.name); }
+function wallSeenGet(){ try{ return parseInt(localStorage.getItem(wallSeenKey())||'0',10)||0; }catch(e){ return 0; } }
+function wallSeenSet(){ try{ localStorage.setItem(wallSeenKey(),String(Date.now())); }catch(e){} }
+function updateWallBadge(){
+  const b=$('#wallBadge'); if(!b)return;
+  const pend=me.isTeacher?wallPosts.filter(p=>p.status==='pending').length:0;
+  const seen=wallSeenGet();
+  const fresh=visiblePosts().filter(p=>(p.ts||0)>seen&&p.by!==me.name).length;
+  if(pend){ b.textContent=pend; b.className='wall-badge pend'; b.title=pend+' waiting for approval'; }
+  else if(fresh&&!wallOpen){ b.textContent=fresh>9?'9+':fresh; b.className='wall-badge'; b.title=fresh+' new'; }
+  else b.className='wall-badge hide';
+}
+
+/* ─── the wall ─── */
+async function openWall(){
+  wallOpen=true; $('#wallOverlay').classList.remove('hide');
+  wallRenderSig='';
+  if(!wallLoaded){ $('#wallBody').innerHTML='<div class="wall-empty">Loading the wall…</div>'; }
+  else renderWall();
+  await wallTick(true);
+  wallSeenSet(); updateWallBadge();
+}
+function closeWall(){ wallOpen=false; $('#wallOverlay').classList.add('hide'); wallSeenSet(); updateWallBadge(); }
+
+function renderWall(){
+  $('#wallTitle').textContent=((cfg.title||'Class')+' · Class Wall').toUpperCase();
+  const pr=$('#wallPrompt');
+  pr.innerHTML=wallCfg.prompt?'<b>SHARE</b>'+esc(wallCfg.prompt)
+    :(me.isTeacher?'<span style="color:var(--muted)">Groups share their work here. Everyone in the class can see it.</span>'
+                  :'<span style="color:var(--muted)">See what every group made. Tap a post to open it.</span>');
+  // teacher settings
+  $('#wallTeacherSet').classList.toggle('hide',!me.isTeacher);
+  $('#wallPostingToggle').checked=wallCfg.posting!==false;
+  $('#wallApproveToggle').checked=!!wallCfg.approve;
+  const add=$('#wallAddBtn');
+  const closed=!me.isTeacher&&wallCfg.posting===false;
+  add.disabled=closed; add.textContent=closed?'🔒 Posting closed':'📤 Share work';
+  const note=$('#wallNotice');
+  if(wSharedFailed()){
+    note.classList.remove('hide');
+    note.textContent='⚠️ Not syncing. The classroom database is unreachable, so this wall only shows what is on this device.';
+  } else if(me.isTeacher&&wallCfg.approve){
+    const n=wallPosts.filter(p=>p.status==='pending').length;
+    note.classList.toggle('hide',!n);
+    note.textContent='⏳ '+n+' post'+(n===1?'':'s')+' waiting for you. Students only see them after you press ✓ Approve.';
+  } else note.classList.add('hide');
+  [...$('#wallViewSeg').children].forEach(b=>b.classList.toggle('on',b.dataset.v===wallView));
+
+  const list=visiblePosts();
+  $('#wallCount').textContent=list.length+' post'+(list.length===1?'':'s');
+  // Only rebuild the cards when something actually changed — no flicker.
+  const sig=wallView+'|'+me.isTeacher+'|'+JSON.stringify(list.map(p=>[p.id,p.v,p.pinned,p.hidden,p.status,p.ts,p.title,p.note,p.link,p.group,p.names,
+    wallLikes[p.id]?[...wallLikes[p.id]].sort().join(','):'']));
+  if(sig===wallRenderSig)return;
+  wallRenderSig=sig;
+  const body=$('#wallBody');
+  if(!list.length){
+    body.innerHTML=`<div class="wall-empty"><span class="big">🖼️</span>Nothing on the wall yet.<br>`
+      +(me.isTeacher?'Groups post from their table with <b>📤 Share our work</b>, or press <b>📤 Share work</b> above to add an example.'
+                    :'Press <b>📤 Share work</b> to post what your group made.')+`</div>`;
+    return;
+  }
+  if(wallView==='table'){
+    const cols={};
+    list.forEach(p=>{const g=wallGroupLabel(p);(cols[g]=cols[g]||{label:g,color:wallColor(p),posts:[],order:typeof p.station==='number'?p.station:(p.byTeacher?-1:99)}).posts.push(p);});
+    const ordered=Object.values(cols).sort((a,b)=>a.order-b.order||a.label.localeCompare(b.label));
+    body.innerHTML='<div class="wall-shelf">'+ordered.map(c=>
+      `<div class="wall-col"><div class="wall-col-h" style="--wc:${c.color}">${esc(c.label)}<span class="ct">${c.posts.length}</span></div>`
+      +c.posts.map(wallCardHTML).join('')+'</div>').join('')+'</div>';
+  } else {
+    body.innerHTML='<div class="wall-grid">'+list.map(wallCardHTML).join('')+'</div>';
+  }
+  wireWallCards(body,list);
+  fillThumbs(body);
+}
+
+function wallCardHTML(p){
+  const likes=wallLikes[p.id]?wallLikes[p.id].size:0;
+  const iLiked=!me.isTeacher&&wallLikes[p.id]&&wallLikes[p.id].has(me.name);
+  const mine=isMinePost(p);
+  const flags=[];
+  if(p.pinned)flags.push('<span class="wc-flag pin">📌 Pinned</span>');
+  if(p.status==='pending')flags.push('<span class="wc-flag pend">⏳ Waiting for teacher</span>');
+  if(p.hidden)flags.push('<span class="wc-flag">🙈 Hidden from class</span>');
+  const n=p.n|0;
+  const yt=(!n&&p.link)?ytThumb(safeUrl(p.link)||''):null;
+  let media='';
+  if(n>0)media=`<div class="wc-media"><div class="wc-flags">${flags.join('')}</div><img data-thumb="${esc(p.id)}" data-v="${p.v|0}" alt="">${n>1?`<span class="wc-count">📷 ${n}</span>`:''}</div>`;
+  else if(yt)media=`<div class="wc-media"><div class="wc-flags">${flags.join('')}</div><img src="${esc(yt)}" alt="" referrerpolicy="no-referrer"><span class="wc-count">▶ Video</span></div>`;
+  const names=wallNames(p);
+  const tools=[];
+  if(me.isTeacher){
+    if(p.status==='pending')tools.push(`<button class="mini-btn go" data-act="approve">✓ Approve</button>`);
+    tools.push(`<button class="mini-btn" data-act="pin">${p.pinned?'Unpin':'📌 Pin'}</button>`);
+    tools.push(`<button class="mini-btn" data-act="hide">${p.hidden?'👁 Show':'🙈 Hide'}</button>`);
+  }
+  if(canEditPost(p)){
+    tools.push(`<button class="mini-btn" data-act="edit">✏️ Edit</button>`);
+    tools.push(`<button class="mini-btn danger" data-act="del">🗑 Delete</button>`);
+  }
+  const starBtn=(me.isTeacher||mine)
+    ?`<button class="wc-star" disabled title="${likes} star${likes===1?'':'s'}">⭐ ${likes}</button>`
+    :`<button class="wc-star${iLiked?' on':''}" data-act="star" title="${iLiked?'Remove your star':'Give a star'}">${iLiked?'⭐':'☆'} ${likes}</button>`;
+  return `<div class="wcard${p.status==='pending'?' is-pending':''}${p.hidden?' is-hidden':''}" data-id="${esc(p.id)}" style="--wc:${wallColor(p)}">
+    ${media}
+    <div class="wc-body">${media?'':(flags.length?`<div class="wc-flags static">${flags.join('')}</div>`:'')}
+      <div class="wc-title">${esc(p.title||'Untitled')}</div>
+      ${p.note?`<div class="wc-note">${esc(p.note)}</div>`:''}
+      ${linkChip(p)}
+    </div>
+    ${names.length?`<div class="wc-names">${esc(names.join(', '))}</div>`:''}
+    <div class="wc-foot"><span class="wc-grp"><i></i><span>${esc(wallGroupLabel(p))}</span></span>${starBtn}<span class="wc-time">${wallAgo(p.ts)}</span></div>
+    ${tools.length?`<div class="wc-tools">${tools.join('')}</div>`:''}
+  </div>`;
+}
+
+function wireWallCards(root,list){
+  root.querySelectorAll('.wcard').forEach(card=>{
+    const id=card.dataset.id;
+    card.onclick=e=>{
+      if(e.target.closest('[data-stop]'))return;
+      const btn=e.target.closest('[data-act]');
+      const p=wallPosts.find(x=>x.id===id); if(!p)return;
+      if(btn){ e.stopPropagation(); if(!btn.disabled)wallAction(btn.dataset.act,p); return; }
+      openLight(list.map(x=>x.id),id);
+    };
+  });
+}
+
+// Fill <img data-thumb> elements from cache, fetching any we haven't got.
+async function fillThumbs(root){
+  const imgs=[...root.querySelectorAll('img[data-thumb]')];
+  for(const im of imgs){
+    const key=im.dataset.thumb+'@'+im.dataset.v;
+    if(_wThumb[key]){ im.src=_wThumb[key]; continue; }
+  }
+  for(const im of imgs){
+    if(im.getAttribute('src'))continue;
+    const key=im.dataset.thumb+'@'+im.dataset.v;
+    if(!_wThumb[key]){
+      const t=await sGet(kWThumb(im.dataset.thumb));
+      if(isImgData(t))_wThumb[key]=t;
+    }
+    if(_wThumb[key])root.querySelectorAll(`img[data-thumb="${CSS.escape(im.dataset.thumb)}"]`).forEach(x=>{x.src=_wThumb[key];});
+  }
+}
+async function getFull(p,i){
+  const key=p.id+'@'+(p.v|0)+':'+i;
+  if(_wFull[key])return _wFull[key];
+  const v=await sGet(kWImg(p.id,i));
+  if(isImgData(v)){ _wFull[key]=v; return v; }
+  return null;
+}
+
+/* ─── actions ─── */
+async function savePostMeta(p){ await sSet(kWPost(p.id),p); await bumpWall(); }
+async function deletePostAssets(p){
+  const n=Math.max(p.n|0,WALL_MAX_PHOTOS);
+  for(let i=0;i<n;i++) await sDel(kWImg(p.id,i));
+  await sDel(kWThumb(p.id));
+  await sDel(kWPost(p.id));
+}
+async function wallAction(act,p){
+  if(act==='star'){
+    const mineKey=kWLike(me.name);
+    const o=(await sGet(mineKey))||{};
+    if(o[p.id])delete o[p.id]; else o[p.id]=true;
+    // optimistic
+    const set=(wallLikes[p.id]=wallLikes[p.id]||new Set());
+    if(o[p.id])set.add(me.name); else set.delete(me.name);
+    renderWall();
+    if(Object.keys(o).length)await sSet(mineKey,o); else await sDel(mineKey);
+    await bumpWall();
+    return;
+  }
+  if(act==='edit'){ openComposer(p); return; }
+  if(act==='del'){
+    if(!confirm('Delete "'+(p.title||'this post')+'" from the wall? This can’t be undone.'))return;
+    await deletePostAssets(p);
+    wallPosts=wallPosts.filter(x=>x.id!==p.id);
+    await bumpWall(); renderWall(); if(dashOpen)renderDashWall();
+    closeLightIfGone();
+    toast('🗑 Post deleted.');
+    return;
+  }
+  if(!me.isTeacher)return;
+  if(act==='approve'){ p.status='live'; }
+  if(act==='pin'){ p.pinned=!p.pinned; }
+  if(act==='hide'){ p.hidden=!p.hidden; }
+  await savePostMeta(p);
+  renderWall(); if(dashOpen)renderDashWall(); wlRefresh(); updateWallBadge();
+}
+
+$('#wallAddBtn').onclick=()=>openComposer(null);
+$('#closeWallBtn').onclick=closeWall;
+$('#wallViewSeg').onclick=e=>{const b=e.target.closest('button[data-v]');if(!b)return;wallView=b.dataset.v;wallRenderSig='';renderWall();};
+$('#wallPostingToggle').onchange=async function(){wallCfg.posting=this.checked;await sSet(K_WALL(),wallCfg);await bumpWall();
+  toast(this.checked?'📤 Students can post again.':'🔒 Posting closed. Students can still view the wall.');renderWall();};
+$('#wallApproveToggle').onchange=async function(){wallCfg.approve=this.checked;await sSet(K_WALL(),wallCfg);await bumpWall();
+  toast(this.checked?'⏳ New student posts will wait for your approval.':'✅ Student posts now appear straight away.');renderWall();};
+$('#wallPromptBtn').onclick=async()=>{
+  const t=prompt('What should groups share? Students see this on the wall and when they post.\n(Leave blank to remove.)',wallCfg.prompt||'');
+  if(t===null)return;
+  wallCfg.prompt=t.trim().slice(0,200); await sSet(K_WALL(),wallCfg); await bumpWall(); renderWall();
+};
+$('#wallClearBtn').onclick=async()=>{
+  if(!confirm('Remove EVERY post from the Class Wall? This can’t be undone.'))return;
+  const posts=await sListVals('wpost:'+classCode+':');
+  for(const k in posts){ const p=posts[k]; if(p&&p.id)await deletePostAssets(p); }
+  for(const k of await sList('wlike:'+classCode+':')) await sDel(k);
+  wallPosts=[]; wallLikes={};
+  await bumpWall(); renderWall(); if(dashOpen)renderDashWall();
+  toast('🗑 Wall cleared.');
+};
+
+/* ─── composer ─── */
+let wcpItems=[], wcpEdit=null, wcpBusy=0, wcpNamesSel=new Set(), wcpStation=null;
+
+async function openComposer(post){
+  if(!me.isTeacher&&!post&&wallCfg.posting===false){ toast('🔒 Your teacher has closed posting for now.'); return; }
+  wcpEdit=post||null; wcpItems=[]; wcpBusy=0;
+  $('#wcpHead').textContent=post?'EDIT POST':'SHARE YOUR WORK';
+  $('#wcpSave').textContent=post?'💾 Save changes':'📌 Post to wall';
+  $('#wcpStatus').textContent=''; $('#wcpStatus').className='wcp-status';
+  const pp=$('#wcpPrompt'); pp.classList.toggle('hide',!wallCfg.prompt); $('#wcpPromptTxt').textContent=wallCfg.prompt||'';
+  $('#wcpTitle').value=post?post.title||'':'';
+  $('#wcpLink').value=post?post.link||'':'';
+  $('#wcpNote').value=post?post.note||'':'';
+  // where is this student sitting right now?
+  let rec=null;
+  if(!me.isTeacher&&!post){ rec=await sGet(kStu(me.name)); }
+  wcpStation=post?(post.station??null):(me.isTeacher?null:((rec&&rec.station!=null)?rec.station:null));
+  $('#wcpGroup').value=post?(post.group||''):(me.isTeacher?'Teacher':(wcpStation!=null?labelFor(wcpStation):''));
+  // names
+  wcpNamesSel=new Set(post?wallNames(post):(me.isTeacher?[]:[me.name]));
+  const showNames=!me.isTeacher||(post&&!post.byTeacher);
+  $('#wcpNamesField').classList.toggle('hide',!showNames);
+  if(showNames){
+    const keys=await sList('stu:'+classCode+':');
+    const studs=[];
+    for(const k of keys){const s=await sGet(k);if(s&&s.name)studs.push(s);}
+    if(!post&&wcpStation!=null) studs.filter(s=>s.station===wcpStation).forEach(s=>wcpNamesSel.add(s.name));
+    const all=[...new Set([...studs.map(s=>s.name),...wcpNamesSel])];
+    const atTable=new Set(studs.filter(s=>wcpStation!=null&&s.station===wcpStation).map(s=>s.name));
+    all.sort((a,b)=>(atTable.has(b)-atTable.has(a))||a.localeCompare(b));
+    renderNameChips(all);
+  }
+  renderWcpThumbs();
+  $('#wallCompose').classList.remove('hide');
+  // edit: pull the existing photos so they can be kept, removed, or reordered
+  if(post&&(post.n|0)>0){
+    wcpBusy++; renderWcpThumbs(); setWcpStatus('Loading photos…');
+    const items=[];
+    for(let i=0;i<(post.n|0);i++){ const f=await getFull(post,i); if(f)items.push({full:f,thumb:i===0?_wThumb[post.id+'@'+(post.v|0)]:null}); }
+    wcpItems=items.concat(wcpItems).slice(0,WALL_MAX_PHOTOS); wcpBusy--; setWcpStatus(''); renderWcpThumbs();
+  }
+  setTimeout(()=>$('#wcpTitle').focus(),50);
+}
+function renderNameChips(all){
+  const box=$('#wcpNames');
+  box.innerHTML=all.map(n=>{
+    const locked=!me.isTeacher&&n===me.name;
+    return `<button type="button" class="wcp-name${wcpNamesSel.has(n)?' on':''}" data-n="${encodeURIComponent(n)}"${locked?' disabled title="That’s you"':''}>${esc(n)}</button>`;
+  }).join('')||'<span class="wcp-hint">No one else has joined yet.</span>';
+  box.querySelectorAll('.wcp-name:not([disabled])').forEach(b=>b.onclick=()=>{
+    const n=decodeURIComponent(b.dataset.n);
+    if(wcpNamesSel.has(n))wcpNamesSel.delete(n); else wcpNamesSel.add(n);
+    b.classList.toggle('on',wcpNamesSel.has(n));
+  });
+}
+function setWcpStatus(msg,err){ const s=$('#wcpStatus'); s.textContent=msg||''; s.className='wcp-status'+(err?' err':''); }
+function renderWcpThumbs(){
+  const box=$('#wcpThumbs');
+  box.innerHTML=wcpItems.map((it,i)=>`<div class="wcp-th"><img src="${it.thumb||it.full}" alt="">${i===0?'<span class="cover">COVER</span>':''}<button type="button" data-rm="${i}" title="Remove">✕</button></div>`).join('')
+    +Array.from({length:wcpBusy},()=>'<div class="wcp-th busy">Shrinking…</div>').join('');
+  box.querySelectorAll('button[data-rm]').forEach(b=>b.onclick=()=>{wcpItems.splice(+b.dataset.rm,1);renderWcpThumbs();});
+  $('#wcpDrop').classList.toggle('full',wcpItems.length+wcpBusy>=WALL_MAX_PHOTOS);
+}
+
+function loadImage(src){
+  return new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error('unreadable'));im.src=src;});
+}
+function drawScaled(im,maxSide,q){
+  const w0=im.naturalWidth||im.width,h0=im.naturalHeight||im.height;
+  const sc=Math.min(1,maxSide/Math.max(w0,h0));
+  const w=Math.max(1,Math.round(w0*sc)),h=Math.max(1,Math.round(h0*sc));
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,w,h); x.drawImage(im,0,0,w,h);
+  return {url:c.toDataURL('image/jpeg',q),w,h};
+}
+async function shrinkPhoto(src){
+  const im=await loadImage(src);
+  let side=1600,q=.8,out=drawScaled(im,side,q);
+  while(out.url.length>WALL_MAX_CHARS&&side>600){ side=Math.round(side*.82); q=Math.max(.6,q-.05); out=drawScaled(im,side,q); }
+  const th=drawScaled(im,520,.72);
+  return {full:out.url,thumb:th.url,w:out.w,h:out.h};
+}
+async function addPhotoFiles(files){
+  const list=[...files].filter(f=>f&&(/^image\//.test(f.type)||/\.(heic|heif|jpe?g|png|webp|gif|bmp)$/i.test(f.name||'')));
+  if(!list.length){ setWcpStatus('That isn’t a photo. For PDFs, slides or videos, paste a link instead.',true); return; }
+  const room=WALL_MAX_PHOTOS-wcpItems.length-wcpBusy;
+  if(room<=0){ setWcpStatus('That’s the maximum of '+WALL_MAX_PHOTOS+' photos.',true); return; }
+  if(list.length>room)setWcpStatus('Only the first '+room+' photo'+(room===1?'':'s')+' were added (max '+WALL_MAX_PHOTOS+').',true);
+  else setWcpStatus('');
+  for(const f of list.slice(0,room)){
+    wcpBusy++; renderWcpThumbs();
+    const url=URL.createObjectURL(f);
+    try{ wcpItems.push(await shrinkPhoto(url)); }
+    catch(e){ setWcpStatus('Couldn’t open "'+(f.name||'photo')+'". '+(/hei[cf]/i.test(f.name||'')?'iPhone HEIC photos only open in Safari: try again from the iPad, or save it as a JPEG.':'Try a JPEG or PNG.'),true); }
+    finally{ URL.revokeObjectURL(url); wcpBusy--; renderWcpThumbs(); }
+  }
+}
+$('#wcpFile').onchange=function(){ addPhotoFiles(this.files); this.value=''; };
+(()=>{
+  const dz=$('#wcpDrop');
+  ['dragenter','dragover'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.add('over');}));
+  ['dragleave','drop'].forEach(ev=>dz.addEventListener(ev,e=>{e.preventDefault();dz.classList.remove('over');}));
+  dz.addEventListener('drop',e=>{ if(e.dataTransfer&&e.dataTransfer.files)addPhotoFiles(e.dataTransfer.files); });
+  // paste a screenshot straight in
+  $('#wallCompose').addEventListener('paste',e=>{
+    const fs=[...((e.clipboardData&&e.clipboardData.files)||[])];
+    if(fs.length){ e.preventDefault(); addPhotoFiles(fs); }
+  });
+})();
+$('#wcpCancel').onclick=()=>{ $('#wallCompose').classList.add('hide'); wcpItems=[]; };
+
+$('#wcpSave').onclick=async()=>{
+  if(wcpBusy){ setWcpStatus('Still shrinking a photo, one moment…'); return; }
+  const title=$('#wcpTitle').value.trim();
+  const rawLink=$('#wcpLink').value.trim();
+  let link=rawLink?safeUrl(rawLink):'';
+  // safeUrl lets the browser percent-encode anything into a "host" — insist on a real domain.
+  try{ if(link&&!/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/i.test(new URL(link).hostname))link=null; }catch(e){ link=null; }
+  const note=$('#wcpNote').value.trim();
+  if(!title){ setWcpStatus('Give your post a title.',true); $('#wcpTitle').focus(); return; }
+  if(rawLink&&!link){ setWcpStatus('That link doesn’t look right. It should start with https://',true); return; }
+  if(!wcpItems.length&&!link&&!note){ setWcpStatus('Add a photo, a link, or a note so the class has something to see.',true); return; }
+  const btn=$('#wcpSave'); btn.disabled=true;
+  try{
+    const prev=wcpEdit;
+    const id=prev?prev.id:('p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
+    const v=(prev?(prev.v|0):0)+1;
+    const n=wcpItems.length;
+    for(let i=0;i<n;i++){
+      setWcpStatus(n>1?`Uploading photo ${i+1} of ${n}…`:'Uploading photo…');
+      if(!await wPutBlob(kWImg(id,i),wcpItems[i].full))throw new Error('upload');
+      _wFull[id+'@'+v+':'+i]=wcpItems[i].full;
+    }
+    for(let i=n;i<Math.max(prev?(prev.n|0):0,WALL_MAX_PHOTOS);i++) await sDel(kWImg(id,i));
+    if(n){
+      let th=wcpItems[0].thumb;
+      if(!th){ th=(await shrinkPhoto(wcpItems[0].full)).thumb; }
+      if(!await wPutBlob(kWThumb(id),th))throw new Error('upload');
+      _wThumb[id+'@'+v]=th;
+    } else await sDel(kWThumb(id));
+    const names=[...wcpNamesSel];
+    if(!me.isTeacher&&!names.includes(me.name)&&!(prev&&prev.by!==me.name))names.unshift(me.name);
+    const post={
+      id,v,
+      by:prev?prev.by:(me.isTeacher?'Teacher':me.name),
+      byTeacher:prev?!!prev.byTeacher:me.isTeacher,
+      names,
+      group:$('#wcpGroup').value.trim().slice(0,40),
+      station:wcpStation??null,
+      title:title.slice(0,70), note:note.slice(0,600), link:link||'',
+      n, w:n?wcpItems[0].w||0:0, h:n?wcpItems[0].h||0:0,
+      ts:prev?prev.ts:Date.now(),
+      edited:prev?Date.now():0,
+      pinned:prev?!!prev.pinned:false,
+      hidden:prev?!!prev.hidden:false,
+      // A student's new post (or edit) goes back to the teacher when approval is on.
+      status:me.isTeacher?(prev?prev.status||'live':'live'):(wallCfg.approve?'pending':'live')
+    };
+    if(post.station===undefined)post.station=null;
+    setWcpStatus('Posting…');
+    await sSet(kWPost(id),post);
+    if(wSharedFailed())throw new Error('upload');
+    await bumpWall();
+    wallPosts=wallPosts.filter(x=>x.id!==id).concat(post);
+    $('#wallCompose').classList.add('hide'); wcpItems=[];
+    toast(post.status==='pending'?'⏳ Sent! It appears on the wall once your teacher approves it.':(prev?'💾 Post updated.':'📌 Posted to the Class Wall!'));
+    if(!wallOpen)await openWall(); else { wallRenderSig=''; renderWall(); }
+    if(dashOpen)renderDashWall();
+    wlRefresh();
+  }catch(e){
+    setWcpStatus('⚠️ Couldn’t upload. Check the internet connection and press the button again.',true);
+  }finally{ btn.disabled=false; }
+};
+
+/* ─── full-screen viewer ─── */
+let wlIds=[], wlI=0, wlImgI=0, wlToken=0;
+function openLight(ids,id){
+  wlIds=ids.slice(); wlI=Math.max(0,wlIds.indexOf(id)); wlImgI=0;
+  $('#wallLight').classList.remove('hide');
+  wlShow();
+}
+function closeLight(){ $('#wallLight').classList.add('hide'); wlToken++; }
+function closeLightIfGone(){
+  if($('#wallLight').classList.contains('hide'))return;
+  wlIds=wlIds.filter(id=>wallPosts.some(p=>p.id===id&&canSeePost(p)));
+  if(!wlIds.length){closeLight();return;}
+  wlI=Math.min(wlI,wlIds.length-1); wlShow();
+}
+function wlRefresh(){ if(!$('#wallLight').classList.contains('hide'))closeLightIfGone(); }
+async function wlShow(){
+  const p=wallPosts.find(x=>x.id===wlIds[wlI]); if(!p){closeLight();return;}
+  const tok=++wlToken;
+  const n=p.n|0; wlImgI=Math.min(wlImgI,Math.max(0,n-1));
+  const stage=$('#wlStage'); stage.style.setProperty('--wc',wallColor(p));
+  $('#wlPos').textContent=(wlI+1)+' / '+wlIds.length;
+  const img=$('#wlImg'), noimg=$('#wlNoImg');
+  const yt=(!n&&p.link)?ytThumb(safeUrl(p.link)||''):null;
+  if(n||yt){
+    noimg.classList.add('hide'); img.classList.remove('hide');
+    if(n){
+      const th=_wThumb[p.id+'@'+(p.v|0)];
+      if(wlImgI===0&&th){img.src=th;img.classList.add('loading');} else {img.removeAttribute('src');}
+      getFull(p,wlImgI).then(f=>{ if(tok!==wlToken)return; if(f){img.src=f;} img.classList.remove('loading'); });
+    } else { img.src=yt; img.classList.remove('loading'); }
+  } else {
+    img.classList.add('hide'); noimg.classList.remove('hide');
+    noimg.style.setProperty('--wc',wallColor(p));
+    noimg.innerHTML=`<h2>${esc(p.title||'Untitled')}</h2>${esc(p.note||'')}${linkChip(p)}`;
+  }
+  $('#wlDots').innerHTML=n>1?Array.from({length:n},(_,i)=>`<i class="${i===wlImgI?'on':''}"></i>`).join(''):'';
+  const multi=wlIds.length>1||n>1;
+  $('#wlPrev').classList.toggle('hide',!multi); $('#wlNext').classList.toggle('hide',!multi);
+  wlRenderSide(p);
+}
+function wlRenderSide(p){
+  const likes=wallLikes[p.id]?wallLikes[p.id].size:0;
+  const iLiked=!me.isTeacher&&wallLikes[p.id]&&wallLikes[p.id].has(me.name);
+  const mine=isMinePost(p), names=wallNames(p);
+  const tools=[];
+  if(!me.isTeacher&&!mine)tools.push(`<button class="wc-star${iLiked?' on':''}" data-act="star">${iLiked?'⭐ Starred':'☆ Give a star'} · ${likes}</button>`);
+  else tools.push(`<span class="wc-star" style="cursor:default">⭐ ${likes}</span>`);
+  if(me.isTeacher){
+    if(p.status==='pending')tools.push(`<button class="mini-btn go" data-act="approve">✓ Approve</button>`);
+    tools.push(`<button class="mini-btn" data-act="pin">${p.pinned?'Unpin':'📌 Pin'}</button>`);
+    tools.push(`<button class="mini-btn" data-act="hide">${p.hidden?'👁 Show':'🙈 Hide'}</button>`);
+  }
+  if(canEditPost(p)){
+    tools.push(`<button class="mini-btn" data-act="edit">✏️ Edit</button>`);
+    tools.push(`<button class="mini-btn danger" data-act="del">🗑 Delete</button>`);
+  }
+  const side=$('#wlSide'); side.style.setProperty('--wc',wallColor(p));
+  side.innerHTML=`<div class="wl-grp"><i></i>${esc(wallGroupLabel(p))}</div>
+    <h2>${esc(p.title||'Untitled')}</h2>
+    ${names.length?`<div class="wl-names">👥 ${esc(names.join(', '))}</div>`:''}
+    ${(p.n|0)||ytThumb(safeUrl(p.link)||'')?`${p.note?`<div class="wl-text">${esc(p.note)}</div>`:''}${linkChip(p)}`:''}
+    ${p.status==='pending'?'<div class="wall-note" style="margin-top:14px">⏳ Waiting for the teacher to approve.</div>':''}
+    ${p.hidden?'<div class="wall-note" style="margin-top:14px">🙈 Hidden from the class.</div>':''}
+    <div class="wl-row">${tools.join('')}</div>
+    <div class="wl-time">Posted ${wallAgo(p.ts)}${p.edited?' · edited':''}</div>`;
+  side.querySelectorAll('[data-act]').forEach(b=>b.onclick=async()=>{
+    const act=b.dataset.act;
+    if(act==='edit'){ closeLight(); }
+    await wallAction(act,p);
+    if(act==='star')wlRenderSide(p);
+  });
+}
+function wlStep(d){
+  const p=wallPosts.find(x=>x.id===wlIds[wlI]); const n=p?(p.n|0):0;
+  if(n>1&&wlImgI+d>=0&&wlImgI+d<n){ wlImgI+=d; wlShow(); return; }
+  if(wlIds.length<2&&n<2)return;
+  wlI=(wlI+d+wlIds.length)%wlIds.length;
+  const q=wallPosts.find(x=>x.id===wlIds[wlI]);
+  wlImgI=d<0&&q?Math.max(0,(q.n|0)-1):0;
+  wlShow();
+}
+$('#wlPrev').onclick=()=>wlStep(-1);
+$('#wlNext').onclick=()=>wlStep(1);
+$('#wlClose').onclick=closeLight;
+$('#wlStage').addEventListener('click',e=>{ if(e.target.id==='wlStage')closeLight(); });
+document.addEventListener('keydown',e=>{
+  if($('#wallLight').classList.contains('hide'))return;
+  if(e.key==='Escape')closeLight();
+  else if(e.key==='ArrowRight')wlStep(1);
+  else if(e.key==='ArrowLeft')wlStep(-1);
+});
+// swipe on tablets
+(()=>{let x0=null;const st=$('#wlStage');
+  st.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;},{passive:true});
+  st.addEventListener('touchend',e=>{ if(x0==null)return; const dx=e.changedTouches[0].clientX-x0; x0=null; if(Math.abs(dx)>50)wlStep(dx<0?1:-1); });
+})();
+
+/* ─── teacher dashboard pane ─── */
+function renderDashWall(){
+  const box=$('#dashWall'); if(!box)return;
+  const list=visiblePosts();
+  const pend=wallPosts.filter(p=>p.status==='pending').length;
+  $('#dashWallCt').textContent=list.length+' post'+(list.length===1?'':'s');
+  const recent=list.filter(p=>p.status!=='pending').slice(0,6);
+  let html='';
+  if(pend)html+=`<div class="dw-pend">⏳ ${pend} waiting for approval<button class="mini-btn" id="dwReview">Review</button></div>`;
+  if(!list.length)html+='<div class="dw-empty">No group work shared yet. Students post from their table with 📤 Share our work.</div>';
+  else html+='<div class="dwall">'+recent.map(p=>{
+    const n=p.n|0, yt=(!n&&p.link)?ytThumb(safeUrl(p.link)||''):null;
+    if(n)return `<div class="dw" data-id="${esc(p.id)}" style="--wc:${wallColor(p)}" title="${esc(p.title)}"><img data-thumb="${esc(p.id)}" data-v="${p.v|0}" alt=""><span>${esc(wallGroupLabel(p))}</span></div>`;
+    if(yt)return `<div class="dw" data-id="${esc(p.id)}" style="--wc:${wallColor(p)}" title="${esc(p.title)}"><img src="${esc(yt)}" alt="" referrerpolicy="no-referrer"><span>${esc(wallGroupLabel(p))}</span></div>`;
+    return `<div class="dw txt" data-id="${esc(p.id)}" style="--wc:${wallColor(p)}">${esc(p.title)}<span></span></div>`;
+  }).join('')+'</div>';
+  html+=`<div class="dw-foot"><span>${wallCfg.posting===false?'🔒 Posting closed':'📤 Posting open'}${wallCfg.approve?' · approval on':''}</span><button class="btn btn-purple btn-sm" id="dwOpen">🖼 Open wall</button></div>`;
+  box.innerHTML=html;
+  const ids=recent.map(p=>p.id);
+  box.querySelectorAll('.dw[data-id]').forEach(el=>el.onclick=()=>openLight(ids,el.dataset.id));
+  const o=$('#dwOpen'); if(o)o.onclick=openWall;
+  const r=$('#dwReview'); if(r)r.onclick=openWall;
+  fillThumbs(box);
+}
+
+$('#wallBtn').onclick=openWall;
+$('#showWallBtn').onclick=openWall;
+$('#aShare').onclick=()=>openComposer(null);
+
 /* ─── POLLING ─── */
-function startPoll(){stopPoll();poll=setInterval(async()=>{await refresh();await pollChat();if(dashOpen)await renderDashboard();if(preOpen)await renderPrePanel();},2500);}
+function startPoll(){stopPoll();poll=setInterval(async()=>{await refresh();await pollChat();if(dashOpen)await renderDashboard();if(preOpen)await renderPrePanel();await wallTick();},2500);}
 function stopPoll(){if(poll){clearInterval(poll);poll=null;}}
 async function pollChat(){
   if(!me.isTeacher&&document.body.classList.contains('docked')){
